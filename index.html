@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<meta charset="utf-8">
+<style>
+
+.counties {
+  fill: none;
+  stroke: #000;
+}
+
+.states {
+  fill: none;
+  stroke: #000;
+  stroke-linejoin: round;
+}
+
+.q0-9 { fill:rgb(247,251,255); }
+.q1-9 { fill:rgb(222,235,247); }
+.q2-9 { fill:rgb(198,219,239); }
+.q3-9 { fill:rgb(158,202,225); }
+.q4-9 { fill:rgb(107,174,214); }
+.q5-9 { fill:rgb(66,146,198); }
+.q6-9 { fill:rgb(33,113,181); }
+.q7-9 { fill:rgb(8,81,156); }
+.q8-9 { fill:rgb(8,48,107); }
+
+</style>
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script src="//d3js.org/topojson.v1.min.js"></script>
+<div id="container"></div>
+<script>
+
+var calc_chartDimensions = function(){
+  headerDimensions = {width: '100%', height: 100}
+
+  citationDimensions = {width: '100%', height: 40}
+
+  width = window.innerWidth
+
+  height = window.innerHeight
+}
+var calc_mapDataSource = function(){
+  mapDataSource = 'unemployment.tsv'
+}
+
+var calc_mapProjection = function(){
+
+  mapscale = width
+
+  projection = d3.geoAlbersUsa()
+    .scale(mapscale)
+    .translate([width / 2, height / 2]);
+
+  path = d3.geoPath()
+    .projection(projection)
+}
+
+var update_geographyAttr = function(us){
+
+  calc_mapProjection()
+
+  geoGAttr = geoG
+      .attr("class", "states")
+    .selectAll("path")
+      .data(topojson.feature(us, us.objects.states).features)
+    .enter().append("path")
+      //.attr("class", function(d) { return quantize(rateById.get(d.id)); })
+      .attr("d", path);
+
+}
+var draw_geography = function(error, us){
+
+  geoG = chart.append('g')
+
+  update_geographyAttr(us)
+}
+var draw_map = function(){
+
+  d3.queue()
+    .defer(d3.json, "us.json")
+    //.defer(d3.tsv, mapDataSource, function(d) { map.set(d.id, +d.rate); })
+    .await(draw_geography);
+}
+
+var update_chartAttr = function(){
+  chartAttr = chart
+    .attr('id','chart0')
+    .attr('width',width)
+    .attr('height',height)
+    .style('position','fixed')
+    .style('top',headerDimensions.height+'px')
+    .style('left','0px')
+}
+var draw_chart = function(){
+  calc_chartDimensions()
+
+  chart = d3.select('#container')
+    .append('svg')
+
+  //chartG = chart
+  //  .append('g')
+
+  update_chartAttr()
+
+  draw_map()
+
+}
+
+draw_chart()
+var nullfunction = function(){
+var aspectRatio= '16:9'
+var svg = d3.select('#container')
+              .append('svg')
+                  .attr('width', '100%')
+                  .attr('height', window.innerHeight)
+                  //.attr("viewBox", "0 0 " + width + " " + height )
+
+//var svg = d3.select("#container")
+
+var rateById = d3.map();
+
+var quantize = d3.scaleQuantize()
+    .domain([0, 0.15])
+    .range(d3.range(9).map(function(i) { return "q" + i + "-9"; }));
+
+var projection = d3.geoAlbersUsa()
+    .scale(width)
+    .translate([width / 2, height / 2]);
+
+var path = d3.geoPath()
+    .projection(projection);
+
+
+
+
+function ready(error, us) {
+  if (error) throw error;
+
+  svgg = svg.append("g")
+      .attr("class", "states")
+    .selectAll("path")
+      .data(topojson.feature(us, us.objects.states).features)
+    .enter().append("path")
+      .attr("class", function(d) { return quantize(rateById.get(d.id)); })
+      .attr("d", path);
+
+  svgpath = svg.append("path")
+      .datum(topojson.mesh(us, us.objects.counties, function(a, b) { return a !== b; }))
+      .attr("class", "counties")
+      .attr("d", path);
+
+  var resize_chart = function(){
+    width = window.innerWidth
+    height = window.innerWidth*9/16;
+
+    projection = d3.geoAlbersUsa()
+      .scale(width)
+      .translate([width / 2, height / 2]);
+
+    path
+      .projection(projection);
+      svgg
+      .attr("d", path);
+
+  svgpath
+      .attr("d", path);
+
+  }
+  d3.select(window).on("resize",resize_chart);
+}
+}
+</script>
