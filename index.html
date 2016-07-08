@@ -35,9 +35,11 @@ var calc_chartDimensions = function(){
 
   citationDimensions = {width: '100%', height: 40}
 
-  width = window.innerWidth
-
-  height = window.innerHeight
+margin = {top: 10, left: 10, bottom: 10, right: 10}
+  , width = parseInt(d3.select('#container').style('width'))
+  , width = width - margin.left - margin.right
+  , mapRatio = .5
+  , height = width * mapRatio;
 }
 var calc_mapDataSource = function(){
   mapDataSource = 'unemployment.tsv'
@@ -55,9 +57,14 @@ var calc_mapProjection = function(){
     .projection(projection)
 }
 
-var update_geographyAttr = function(us){
+var update_geographyAttr = function(us,stateTSV){
 
   calc_mapProjection()
+
+  statenames = {}
+  stateTSV.forEach(function(d,i){
+    statenames[d.id] = d.name
+  })
 
   geoGAttr = geoG
       .attr("class", "states")
@@ -65,31 +72,49 @@ var update_geographyAttr = function(us){
       .data(topojson.feature(us, us.objects.states).features)
     .enter().append("path")
       //.attr("class", function(d) { return quantize(rateById.get(d.id)); })
+      .attr("d", path)
+      .attr('class','state')
+      .attr('id',function(d){return statenames[d.id]});
+
+geoGCounty = geoG.append("path")
+      .datum(topojson.mesh(us, us.objects.counties, function(a, b) { return a !== b; }))
+      .attr("class", "counties")
       .attr("d", path);
+  //console.log(us)
+
 
 }
-var draw_geography = function(error, us){
+
+var draw_geography = function(error, us, stateTSV){
 
   geoG = chart.append('g')
 
-  update_geographyAttr(us)
+  update_geographyAttr(us,stateTSV)
 }
 var draw_map = function(){
 
   d3.queue()
     .defer(d3.json, "us.json")
+    .defer(d3.tsv, 'us-state-names.tsv')
     //.defer(d3.tsv, mapDataSource, function(d) { map.set(d.id, +d.rate); })
     .await(draw_geography);
 }
 
+var resize_chart = function(){
+  calc_chartDimensions()
+  calc_mapProjection()
+
+  geoG.select('.land').attr('d', path);
+  geoG.selectAll('.state').attr('d', path); 
+}
+
+//d3.select(window).on("resize",resize_chart);
+
 var update_chartAttr = function(){
   chartAttr = chart
     .attr('id','chart0')
-    .attr('width',width)
-    .attr('height',height)
-    .style('position','fixed')
-    .style('top',headerDimensions.height+'px')
-    .style('left','0px')
+        .attr("viewBox", "0 0 " + width + " " + height )
+        .attr("preserveAspectRatio", "xMinYMin");
 }
 var draw_chart = function(){
   calc_chartDimensions()
@@ -111,8 +136,8 @@ var nullfunction = function(){
 var aspectRatio= '16:9'
 var svg = d3.select('#container')
               .append('svg')
-                  .attr('width', '100%')
-                  .attr('height', window.innerHeight)
+              .attr('width', '100%')
+              .attr('height', window.innerHeight)
                   //.attr("viewBox", "0 0 " + width + " " + height )
 
 //var svg = d3.select("#container")
