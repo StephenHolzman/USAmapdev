@@ -84,12 +84,25 @@ var update_geographyAttr = function(us,stateTSV){
 
 
 }
-
+function zoomed() {
+  //g.style("stroke-width", 1.5 / d3.event.scale + "px");
+  geoG.attr("transform", d3.event.transform);
+}
 var draw_geography = function(error, us, stateTSV){
 
   geoG = chart.append('g')
 
   update_geographyAttr(us,stateTSV)
+
+  zoom = d3.zoom()
+    //.translateBy(0, 0)
+    //.scaleBy(1)
+    .scaleExtent([1, 8])
+    .on("zoom", zoomed);
+
+  chart
+    .call(zoom) // delete this line to disable free zooming
+    .call(zoom.transform, d3.zoomIdentity);
 }
 var draw_map = function(){
 

@@ -2,125 +2,95 @@
 <meta charset="utf-8">
 <style>
 
-.background {
+.counties {
   fill: none;
-  pointer-events: all;
 }
 
-.feature {
-  fill: #ccc;
-  cursor: pointer;
-}
-
-.feature.active {
-  fill: orange;
-}
-
-.mesh {
+.states {
   fill: none;
   stroke: #fff;
-  stroke-linecap: round;
   stroke-linejoin: round;
 }
 
+.q0-9 { fill:rgb(247,251,255); }
+.q1-9 { fill:rgb(222,235,247); }
+.q2-9 { fill:rgb(198,219,239); }
+.q3-9 { fill:rgb(158,202,225); }
+.q4-9 { fill:rgb(107,174,214); }
+.q5-9 { fill:rgb(66,146,198); }
+.q6-9 { fill:rgb(33,113,181); }
+.q7-9 { fill:rgb(8,81,156); }
+.q8-9 { fill:rgb(8,48,107); }
+
 </style>
-<body>
+<div id='container'>
+</div>
 <script src="//d3js.org/d3.v4.min.js"></script>
 <script src="//d3js.org/topojson.v1.min.js"></script>
 <script>
+margin = {top: 10, left: 10, bottom: 10, right: 10}
+  , width = parseInt(d3.select('#container').style('width'))
+  , width = width - margin.left - margin.right
+  , mapRatio = .5
+  , height = width * mapRatio;
 
-var width = 960,
-    height = 500,
-    active = d3.select(null);
+
+var svg = d3.select("#container").append('svg')
+.attr("viewBox", "0 0 " + width + " " + height )
+        .attr("preserveAspectRatio", "xMinYMin");
+
+g = svg.append('g')
+    //width = +svg.attr("width"),
+    //height = +svg.attr("height");
+
+var rateById = d3.map();
+
+var quantize = d3.scaleQuantize()
+    .domain([0, 0.15])
+    .range(d3.range(9).map(function(i) { return "q" + i + "-9"; }));
 
 var projection = d3.geoAlbersUsa()
-    .scale(1000)
+    .scale(width)
     .translate([width / 2, height / 2]);
-
-var zoom = d3.zoom()
-    //.translateBy(0, 0)
-    //.scaleBy(1)
-    //.scaleExtent([1, 8])
-    .on("zoom", zoomed);
 
 var path = d3.geoPath()
     .projection(projection);
 
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .on("click", stopped, true);
+function zoomed() {
+  //g.style("stroke-width", 1.5 / d3.event.scale + "px");
+  g.attr("transform", d3.event.transform);
+}
 
-svg.append("rect")
-    .attr("class", "background")
-    .attr("width", width)
-    .attr("height", height)
-    .on("click", reset);
+d3.queue()
+    .defer(d3.json, "us.json")
+    .defer(d3.tsv, "unemployment.tsv", function(d) { rateById.set(d.id, +d.rate); })
+    .await(ready);
 
-var g = svg.append("g");
-
-svg
-    .call(zoom) // delete this line to disable free zooming
-    .call(zoom.transform, d3.zoomIdentity);
-
-d3.json("/us.json", function(error, us) {
+function ready(error, us) {
   if (error) throw error;
 
-  g.selectAll("path")
-      .data(topojson.feature(us, us.objects.states).features)
+  g.append("g")
+      .attr("class", "counties")
+    .selectAll("path")
+      .data(topojson.feature(us, us.objects.counties).features)
     .enter().append("path")
-      .attr("d", path)
-      .attr("class", "feature")
-      .on("click", clicked);
+      .attr("class", function(d) { return quantize(rateById.get(d.id)); })
+      .attr("d", path);
 
   g.append("path")
       .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
-      .attr("class", "mesh")
+      .attr("class", "states")
       .attr("d", path);
-});
 
-function clicked(d) {
-  if (active.node() === this) return reset();
-  active.classed("active", false);
-  active = d3.select(this).classed("active", true);
+  zoom = d3.zoom()
+    //.translateBy(0, 0)
+    //.scaleBy(1)
+    .scaleExtent([1, 8])
+    .on("zoom", zoomed);
 
-  var bounds = path.bounds(d),
-      dx = bounds[1][0] - bounds[0][0],
-      dy = bounds[1][1] - bounds[0][1],
-      x = (bounds[0][0] + bounds[1][0]) / 2,
-      y = (bounds[0][1] + bounds[1][1]) / 2,
-      scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / width, dy / height))),
-      translate = [width / 2 - scale * x, height / 2 - scale * y];
-      //console.log(translate)
-  //svg//.transition()
-      //.duration(750)
-      //.call(zoom.translateBy(500,500))
-      //.call(zoom.translateBy(translate).scaleBy(scale));
-
-      //console.log(zoom)
-    zoom.translateBy(svg,500,0)
-
-
-}
-
-function reset() {
-  active.classed("active", false);
-  active = d3.select(null);
-
-  svg.transition()
-      .duration(750)
-      //.call(zoom.translate([0, 0]).scale(1).event);
-}
-
-function zoomed() {
-  g.style("stroke-width", 1.5 / d3.event.scale + "px");
-  g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-}
-
-// If the drag behavior prevents the default click,
-// also stop propagation so we don’t click-to-zoom.
-function stopped() {
-  if (d3.event.defaultPrevented) d3.event.stopPropagation();
+  svg
+    .call(zoom) // delete this line to disable free zooming
+    .call(zoom.transform, d3.zoomIdentity);
 }
 
 </script>
