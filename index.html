@@ -27,7 +27,7 @@ html{
 .q8-9 { fill:rgb(8,48,107); }
 
 #footer {
-  height: 120px;
+  height: 40px;
   width: 100%;
   background-color: #203467;
   position: fixed;
@@ -35,12 +35,24 @@ html{
   left: 0;
 }
 #header {
-  height: 120px;
+  height: 60px;
   width: 100%;
-  background-color: #203467;
+  background-color: #f1eede;
   position: fixed;
-  top: 0;
-  left: 0; 
+  top: 28px;
+  left: 0px;
+  color:#203467;
+  padding:8px;
+  font-size: 26px;
+}
+#options {
+  background:#f36f23;
+  width:100%;
+  height:28px;
+  position:fixed;
+  top:0px;
+  left:0px;
+
 }
 .tooltip { 
     position: absolute;     
@@ -53,11 +65,28 @@ html{
     pointer-events: none;    
 
 }
+#container {
+  position:fixed;
+  top:60px;
+  bottom:80px;
+  left:0px;
+  width:100%;
+  max-height:700px;
+
+}
+
+#bigcontainer {
+  width:100%;
+  display:inline-block;
+}
 
 </style>
-
+<div id='bigcontainer'>
+<div id='header'>USA Population - 2000 2010 2015 2020 2030 2040</div>
 <div id='container'></div>
-
+<div id='options'></div>
+<div id='footer'></div>
+</div>
 <script src="//d3js.org/d3.v4.min.js"></script>
 <script src="//d3js.org/topojson.v1.min.js"></script>
 <script>
@@ -77,16 +106,17 @@ set_dataset = {
 //Almost all code was informed by one example or another.
 //Which, by the way, thanks to Bostock for developing this library!
 
-margin = {top: 0, left: 10, bottom: 10, right: 0}
+margin = {top: 0, left: 0, bottom: 0, right: 0}
   , width = parseInt(d3.select('#container').style('width'))
   , width = width - margin.left - margin.right
   , mapRatio = .5
   , height = width * mapRatio - margin.top - margin.bottom;
 
 
-var svg = d3.select("#container").append('svg')
-.attr("viewBox", "0 0 " + width + " " + height )
-        .attr("preserveAspectRatio", "xMinYMin");
+var svg = d3.select("#container").append('svg')/*.attr('id','mapsvg')*/
+  
+svg.attr("viewBox", "0 0 " + width + " " + height )
+  .attr("preserveAspectRatio", "xMinYMin");
 
 g = svg.append('g')
     //width = +svg.attr("width"),
@@ -118,6 +148,7 @@ if(set_geography==='county'){
 function zoomed() {
   //g.style("stroke-width", 1.5 / d3.event.scale + "px");
   g.attr("transform", d3.event.transform);
+
 }
 
 d3.queue()
@@ -140,7 +171,7 @@ function ready(error, data) {
         .on('mouseover', function(d, i) {
 
                 var currentState = this;
-                d3.select(this).style('fill', '#f36f20').style('stroke','#f36f20').style('stroke-width',10);
+                d3.select(this).style('fill', '#f36f20');
 
                // rateById.get(d3.select(this).attr('id'))
 
@@ -177,7 +208,7 @@ function ready(error, data) {
   zoom = d3.zoom()
     //.translateBy(0, 0)
     //.scaleBy(1)
-    .scaleExtent([1, 8])
+    .scaleExtent([1, 12])
     .on("zoom", zoomed);
 
   svg
