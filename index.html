@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-
 <meta charset="utf-8">
 <style>
 
 .counties {
   fill: none;
-  stroke: #000;
+}
+html{
+  background-color:#f1eede;
 }
 
 .states {
   fill: none;
   stroke: #000;
+  stroke-width:.5;
   stroke-linejoin: round;
 }
 
@@ -24,141 +26,78 @@
 .q7-9 { fill:rgb(8,81,156); }
 .q8-9 { fill:rgb(8,48,107); }
 
+#footer {
+  height: 120px;
+  width: 100%;
+  background-color: #203467;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+}
+#header {
+  height: 120px;
+  width: 100%;
+  background-color: #203467;
+  position: fixed;
+  top: 0;
+  left: 0; 
+}
+.tooltip { 
+    position: absolute;     
+    text-align: center;      
+    padding: 2px;       
+    background: #f36f20; 
+    font: 12px sans-serif;    
+    border: 0px;    
+    border-radius: 8px;     
+    pointer-events: none;    
+
+}
+
 </style>
+
+<div id='container'></div>
+
 <script src="//d3js.org/d3.v4.min.js"></script>
 <script src="//d3js.org/topojson.v1.min.js"></script>
-<div id="container"></div>
 <script>
 
-var calc_chartDimensions = function(){
-  headerDimensions = {width: '100%', height: 100}
+//set unique map specific parameters here
+set_geography = 'county' //options are county, state, congress, puma
+set_dataset = {
+  //path: 'unemployment.tsv',
+  path: 'pop2015.tsv',
+  idvar: 'id',
+  colorvar: 'estimate',
+  tooltipvars: ['rate']
+}
+//end unique map specific parameters
+//do not edit below without care
+//See Mike Bostock's incredible D3 examples at bl.ocks.org for further general understanding.
+//Almost all code was informed by one example or another.
+//Which, by the way, thanks to Bostock for developing this library!
 
-  citationDimensions = {width: '100%', height: 40}
-
-margin = {top: 10, left: 10, bottom: 10, right: 10}
+margin = {top: 0, left: 10, bottom: 10, right: 0}
   , width = parseInt(d3.select('#container').style('width'))
   , width = width - margin.left - margin.right
   , mapRatio = .5
-  , height = width * mapRatio;
-}
-var calc_mapDataSource = function(){
-  mapDataSource = 'unemployment.tsv'
-}
-
-var calc_mapProjection = function(){
-
-  mapscale = width
-
-  projection = d3.geoAlbersUsa()
-    .scale(mapscale)
-    .translate([width / 2, height / 2]);
-
-  path = d3.geoPath()
-    .projection(projection)
-}
-
-var update_geographyAttr = function(us,stateTSV){
-
-  calc_mapProjection()
-
-  statenames = {}
-  stateTSV.forEach(function(d,i){
-    statenames[d.id] = d.name
-  })
-
-  geoGAttr = geoG
-      .attr("class", "states")
-    .selectAll("path")
-      .data(topojson.feature(us, us.objects.states).features)
-    .enter().append("path")
-      //.attr("class", function(d) { return quantize(rateById.get(d.id)); })
-      .attr("d", path)
-      .attr('class','state')
-      .attr('id',function(d){return statenames[d.id]});
-
-  geoGCounty = geoG.append("path")
-      .datum(topojson.mesh(us, us.objects.counties, function(a, b) { return a !== b; }))
-      .attr("class", "counties")
-      .attr("d", path);
-  //console.log(us)
+  , height = width * mapRatio - margin.top - margin.bottom;
 
 
-}
-function zoomed() {
-  //g.style("stroke-width", 1.5 / d3.event.scale + "px");
-  geoG.attr("transform", d3.event.transform);
-}
-var draw_geography = function(error, us, stateTSV){
-
-  geoG = chart.append('g')
-
-  update_geographyAttr(us,stateTSV)
-
-  zoom = d3.zoom()
-    //.translateBy(0, 0)
-    //.scaleBy(1)
-    .scaleExtent([1, 8])
-    .on("zoom", zoomed);
-
-  chart
-    .call(zoom) // delete this line to disable free zooming
-    .call(zoom.transform, d3.zoomIdentity);
-}
-var draw_map = function(){
-
-  d3.queue()
-    .defer(d3.json, "us.json")
-    .defer(d3.tsv, 'us-state-names.tsv')
-    //.defer(d3.tsv, mapDataSource, function(d) { map.set(d.id, +d.rate); })
-    .await(draw_geography);
-}
-
-var resize_chart = function(){
-  calc_chartDimensions()
-  calc_mapProjection()
-
-  geoG.select('.land').attr('d', path);
-  geoG.selectAll('.state').attr('d', path); 
-}
-
-//d3.select(window).on("resize",resize_chart);
-
-var update_chartAttr = function(){
-  chartAttr = chart
-    .attr('id','chart0')
-        .attr("viewBox", "0 0 " + width + " " + height )
+var svg = d3.select("#container").append('svg')
+.attr("viewBox", "0 0 " + width + " " + height )
         .attr("preserveAspectRatio", "xMinYMin");
-}
-var draw_chart = function(){
-  calc_chartDimensions()
 
-  chart = d3.select('#container')
-    .append('svg')
-
-  //chartG = chart
-  //  .append('g')
-
-  update_chartAttr()
-
-  draw_map()
-
-}
-
-draw_chart()
-var nullfunction = function(){
-var aspectRatio= '16:9'
-var svg = d3.select('#container')
-              .append('svg')
-              .attr('width', '100%')
-              .attr('height', window.innerHeight)
-                  //.attr("viewBox", "0 0 " + width + " " + height )
-
-//var svg = d3.select("#container")
+g = svg.append('g')
+    //width = +svg.attr("width"),
+    //height = +svg.attr("height");
 
 var rateById = d3.map();
 
+var nameById = d3.map();
+
 var quantize = d3.scaleQuantize()
-    .domain([0, 0.15])
+    .domain([0, 200000])
     .range(d3.range(9).map(function(i) { return "q" + i + "-9"; }));
 
 var projection = d3.geoAlbersUsa()
@@ -168,6 +107,82 @@ var projection = d3.geoAlbersUsa()
 var path = d3.geoPath()
     .projection(projection);
 
+var div = d3.select("html").append("a") 
+    .attr("class", "tooltip")       
+    .style("opacity", 0);
 
+if(set_geography==='county'){
+  target_json = 'uscounty.json'
 }
+
+function zoomed() {
+  //g.style("stroke-width", 1.5 / d3.event.scale + "px");
+  g.attr("transform", d3.event.transform);
+}
+
+d3.queue()
+    .defer(d3.json, target_json)
+    .defer(d3.tsv, set_dataset.path, function(d) { rateById.set(d.id, eval('+d.'+set_dataset.colorvar)); nameById.set(d.id,d.Geography)})
+    .await(ready);
+
+function ready(error, data) {
+  if (error) throw error;
+
+  if(set_geography==='county'){
+    g.append("g")
+        .attr("class", "counties")
+      .selectAll("path")
+        .data(topojson.feature(data, data.objects.counties).features)
+      .enter().append("path")
+        .attr("class", function(d) { return quantize(rateById.get(eval('d.'+set_dataset.idvar))); })
+        .attr('id',function(d){return eval('d.'+set_dataset.idvar)})
+        .attr("d", path)
+        .on('mouseover', function(d, i) {
+
+                var currentState = this;
+                d3.select(this).style('fill', '#f36f20').style('stroke','#f36f20').style('stroke-width',10);
+
+               // rateById.get(d3.select(this).attr('id'))
+
+            div.transition()    
+                .duration(200)    
+                .style("opacity", .9);
+
+            div.text(nameById.get(d3.select(this).attr('id')) + ':\n'+rateById.get(d3.select(this).attr('id')))   
+            /*div .text(function(){return rateById.get(d3.select(this).attr('id'))})  */
+                .style("left", (d3.event.pageX -100) + "px")   
+                .style("top", (d3.event.pageY + 60) + "px")
+                .style("font", window.innerWidth/20);  
+
+                
+
+        })
+        .on('mouseout',function(d, i){
+
+                var currentState = this;
+                d3.select(this).style('fill',null).style('stroke',null);
+
+                            div.transition()    
+                .duration(500)    
+                .style("opacity", 0);          
+        });    
+  }
+
+
+  g.append("path")
+      .datum(topojson.mesh(data, data.objects.states, function(a, b) { return a !== b; }))
+      .attr("class", "states")
+      .attr("d", path);
+
+  zoom = d3.zoom()
+    //.translateBy(0, 0)
+    //.scaleBy(1)
+    .scaleExtent([1, 8])
+    .on("zoom", zoomed);
+
+  svg
+    .call(zoom) // delete this line to disable free zooming
+    .call(zoom.transform, d3.zoomIdentity);
+}
+
 </script>

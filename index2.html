@@ -8,6 +8,7 @@
 html{
   background-color:#f1eede;
 }
+
 .states {
   fill: none;
   stroke: #000;
@@ -25,9 +26,38 @@ html{
 .q7-9 { fill:rgb(8,81,156); }
 .q8-9 { fill:rgb(8,48,107); }
 
+#footer {
+  height: 120px;
+  width: 100%;
+  background-color: #203467;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+}
+#header {
+  height: 120px;
+  width: 100%;
+  background-color: #203467;
+  position: fixed;
+  top: 0;
+  left: 0; 
+}
+.tooltip { 
+    position: absolute;     
+    text-align: center;      
+    padding: 2px;       
+    background: #f36f20; 
+    font: 12px sans-serif;    
+    border: 0px;    
+    border-radius: 8px;     
+    pointer-events: none;    
+
+}
+
 </style>
-<div id='container'>
-</div>
+
+<div id='container'></div>
+
 <script src="//d3js.org/d3.v4.min.js"></script>
 <script src="//d3js.org/topojson.v1.min.js"></script>
 <script>
@@ -47,11 +77,11 @@ set_dataset = {
 //Almost all code was informed by one example or another.
 //Which, by the way, thanks to Bostock for developing this library!
 
-margin = {top: 10, left: 10, bottom: 10, right: 10}
+margin = {top: 0, left: 10, bottom: 10, right: 0}
   , width = parseInt(d3.select('#container').style('width'))
   , width = width - margin.left - margin.right
   , mapRatio = .5
-  , height = width * mapRatio;
+  , height = width * mapRatio - margin.top - margin.bottom;
 
 
 var svg = d3.select("#container").append('svg')
@@ -64,6 +94,8 @@ g = svg.append('g')
 
 var rateById = d3.map();
 
+var nameById = d3.map();
+
 var quantize = d3.scaleQuantize()
     .domain([0, 200000])
     .range(d3.range(9).map(function(i) { return "q" + i + "-9"; }));
@@ -74,6 +106,10 @@ var projection = d3.geoAlbersUsa()
 
 var path = d3.geoPath()
     .projection(projection);
+
+var div = d3.select("html").append("a") 
+    .attr("class", "tooltip")       
+    .style("opacity", 0);
 
 if(set_geography==='county'){
   target_json = 'uscounty.json'
@@ -86,7 +122,7 @@ function zoomed() {
 
 d3.queue()
     .defer(d3.json, target_json)
-    .defer(d3.tsv, set_dataset.path, function(d) { rateById.set(d.id, eval('+d.'+set_dataset.colorvar)); })
+    .defer(d3.tsv, set_dataset.path, function(d) { rateById.set(d.id, eval('+d.'+set_dataset.colorvar)); nameById.set(d.id,d.Geography)})
     .await(ready);
 
 function ready(error, data) {
@@ -99,17 +135,36 @@ function ready(error, data) {
         .data(topojson.feature(data, data.objects.counties).features)
       .enter().append("path")
         .attr("class", function(d) { return quantize(rateById.get(eval('d.'+set_dataset.idvar))); })
+        .attr('id',function(d){return eval('d.'+set_dataset.idvar)})
         .attr("d", path)
         .on('mouseover', function(d, i) {
 
                 var currentState = this;
                 d3.select(this).style('fill', '#f36f20');
 
+               // rateById.get(d3.select(this).attr('id'))
 
-                })
+            div.transition()    
+                .duration(200)    
+                .style("opacity", .9);
+
+            div.text(nameById.get(d3.select(this).attr('id')) + ':\n'+rateById.get(d3.select(this).attr('id')))   
+            /*div .text(function(){return rateById.get(d3.select(this).attr('id'))})  */
+                .style("left", (d3.event.pageX -100) + "px")   
+                .style("top", (d3.event.pageY + 60) + "px")
+                .style("font", window.innerWidth/20);  
+
+                
+
+        })
         .on('mouseout',function(d, i){
+
                 var currentState = this;
-                d3.select(this).style('fill',null);          
+                d3.select(this).style('fill',null);
+
+                            div.transition()    
+                .duration(500)    
+                .style("opacity", 0);          
         });    
   }
 
