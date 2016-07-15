@@ -142,7 +142,7 @@ var div = d3.select("html").append("a")
     .style("opacity", 0);
 
 if(set_geography==='county'){
-  target_json = 'uscounty.json'
+  target_json = 'countytopo.json'
 }
 
 function zoomed() {
@@ -150,7 +150,9 @@ function zoomed() {
   g.attr("transform", d3.event.transform);
 
 }
-
+d3.json('countytopo.json',function(dat){
+  console.log(dat)
+})
 d3.queue()
     .defer(d3.json, target_json)
     .defer(d3.tsv, set_dataset.path, function(d) { rateById.set(d.id, eval('+d.'+set_dataset.colorvar)); nameById.set(d.id,d.Geography)})
@@ -158,7 +160,7 @@ d3.queue()
 
 function ready(error, data) {
   if (error) throw error;
-
+  console.log(data)
   if(set_geography==='county'){
     g.append("g")
         .attr("class", "counties")
@@ -200,15 +202,15 @@ function ready(error, data) {
   }
 
 
-  g.append("path")
+  /*g.append("path")
       .datum(topojson.mesh(data, data.objects.states, function(a, b) { return a !== b; }))
       .attr("class", "states")
       .attr("d", path);
-
+*/
   zoom = d3.zoom()
     //.translateBy(0, 0)
     //.scaleBy(1)
-    .scaleExtent([1, 12])
+    .scaleExtent([1, 50])
     .on("zoom", zoomed);
 
   svg
