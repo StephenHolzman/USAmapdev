@@ -4,6 +4,8 @@
 
 .counties {
   fill: none;
+  stroke:#000;
+  stroke-width:.1;
 }
 html{
   background-color:#f1eede;
@@ -82,7 +84,7 @@ html{
 
 </style>
 <div id='bigcontainer'>
-<div id='header'>USA Population - 2000 2010 2015 2020 2030 2040</div>
+<div id='header'>USA Population</div>
 <div id='container'></div>
 <div id='options'></div>
 <div id='footer'></div>
@@ -173,7 +175,7 @@ function ready(error, data) {
         .on('mouseover', function(d, i) {
 
                 var currentState = this;
-                d3.select(this).style('fill', '#f36f20');
+                d3.select(this).transition().duration(200).style('fill', '#f36f20');
 
                // rateById.get(d3.select(this).attr('id'))
 
@@ -193,7 +195,7 @@ function ready(error, data) {
         .on('mouseout',function(d, i){
 
                 var currentState = this;
-                d3.select(this).style('fill',null).style('stroke',null);
+                d3.select(this).transition().duration(200).style('fill',null).style('stroke',null);
 
                             div.transition()    
                 .duration(500)    
@@ -201,12 +203,20 @@ function ready(error, data) {
         });    
   }
 
-
-  /*g.append("path")
-      .datum(topojson.mesh(data, data.objects.states, function(a, b) { return a !== b; }))
-      .attr("class", "states")
+/*
+  g.append('g').attr("class", "states").append("path")
+      .datum(topojson.mesh(data, data.objects.states, function(a, b) { return a !== b; }))   
       .attr("d", path);
 */
+
+g.append("g")
+        .attr("class", "states")
+      .selectAll("path")
+        .data(topojson.feature(data, data.objects.states).features)
+      .enter().append("path")
+        //.attr("class", function(d) { return quantize(rateById.get(eval('d.'+set_dataset.idvar))); })
+        //.attr('id',function(d){return eval('d.'+set_dataset.idvar)})
+        .attr("d", path)
   zoom = d3.zoom()
     //.translateBy(0, 0)
     //.scaleBy(1)
