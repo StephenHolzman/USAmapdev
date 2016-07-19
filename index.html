@@ -96,11 +96,75 @@ html{
 //set unique map specific parameters here
 set_geography = 'county' //options are county, state, congress, puma
 set_dataset = {
-  //path: 'unemployment.tsv',
-  path: 'pop2015.tsv',
-  idvar: 'id',
-  colorvar: 'estimate',
-  tooltipvars: ['rate']
+  controlOptions: {
+    "Race": [
+      {
+        code: "TOT_POP",
+        label: "Total Population"
+      },
+      {
+        code: "NHAA",
+        label: "Asian (non-Hispanic)"
+      },
+      {
+        code: "NHBA",
+        label: "Black (non-Hispanic)"
+      },
+      {
+        code: "NHWA",
+        label: "White (non-Hispanic)"
+      },
+      {
+        code: "NHOT",
+        label: "Other (non-Hispanic)"
+      },
+      {
+        code: "H",
+        label: "Hispanic (any race)"
+      }
+    ],
+    "Age": [
+      {
+        code: 0,
+        label: "All"
+      },
+      {
+        code: 1,
+        label: "0 to 4"
+      },
+      {
+        code: 2,
+        label: "5 to 9"
+      },
+      {
+        code: 3,
+        label: "10 to 14"
+      }
+    ],
+    "Sex": [
+      {
+        code: 0,
+        label: "All"
+      },
+      {
+        code: 1,
+        label: "Female"
+      },
+      {
+        code: 2,
+        label: "Male"
+      }
+    ]
+  },
+  path: 'data/',
+  idvar: 'ID',
+  focus: "race", //Set to one of control options
+  focusSelect: "TOT", //Set to focus option code
+  file: "Age0Sex0.tsv",//take any control options not in focus in order in format "OPTIONCODE", should be a tsv
+  tooltip: {
+    title: "CTYNAME",
+    display:"Table"
+  }
 }
 //end unique map specific parameters
 //do not edit below without care
@@ -129,7 +193,7 @@ var rateById = d3.map();
 var nameById = d3.map();
 
 var quantize = d3.scaleQuantize()
-    .domain([0, 200000])
+    .domain([0, 150000])
     .range(d3.range(9).map(function(i) { return "q" + i + "-9"; }));
 
 var projection = d3.geoAlbersUsa()
@@ -157,20 +221,20 @@ d3.json('countytopo.json',function(dat){
 })
 d3.queue()
     .defer(d3.json, target_json)
-    .defer(d3.tsv, set_dataset.path, function(d) { rateById.set(d.id, eval('+d.'+set_dataset.colorvar)); nameById.set(d.id,d.Geography)})
+    .defer(d3.tsv, (set_dataset.path + set_dataset.file), function(d) { rateById.set(d.ID, eval('+d.'+set_dataset.controlOptions.Race[0].code)); nameById.set(d.ID,d.CTYNAME)})
     .await(ready);
 
 function ready(error, data) {
   if (error) throw error;
-  console.log(data)
+  
   if(set_geography==='county'){
     g.append("g")
         .attr("class", "counties")
       .selectAll("path")
         .data(topojson.feature(data, data.objects.counties).features)
       .enter().append("path")
-        .attr("class", function(d) { return quantize(rateById.get(eval('d.'+set_dataset.idvar))); })
-        .attr('id',function(d){return eval('d.'+set_dataset.idvar)})
+        .attr("class", function(d) { return quantize(rateById.get(d.id)); })
+        .attr('id',function(d){return d.id})
         .attr("d", path)
         .on('mouseover', function(d, i) {
 
