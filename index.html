@@ -37,12 +37,12 @@
 #header {
   height: 88px;
   flex: 1 100%;
-  background-color: #f1eede;
+  background-color: #203467;
   margin:0px;
   /*position: fixed;
   top: 0px;
   left: 0px;*/
-  color:#203467;
+  color:white;
   padding:8px;
   font-size: 40px;
 }
@@ -50,19 +50,23 @@
   background:#e0e0d1;
   border-style:solid;
   border-color:#e0e0d1 #e0e0d1 #e0e0d1 black ;
-  height:100%;
-
+  max-width:100%;
+  min-height:400px;
+  flex: 1 0px;
 }
 h1,h2,a{
   color:#203467;
   padding:10px;
 }
-table, th, td {
+table, th, td{
   border-bottom: 1px solid #000;
   text-align: left;
   padding:10px;
   width:100%;
   color:#203467;
+}
+select{
+  width:100%;
 }
 .tooltip { 
     position: absolute;     
@@ -90,18 +94,18 @@ table, th, td {
   display: flex;
   flex-flow: row wrap;
 }
-@media all and (min-width: 600px) {
+/*@media all and (min-width: 600px) {
   /* We tell both sidebars to share a row */
-  #options { flex: 1 auto; }
-}
+ /* #options { flex: 1 0px; }
+}*/
 
 /* Large screens */
-@media all and (min-width: 800px) {
+@media all and (min-width: 1200px) {
   /* We invert order of first sidebar and main
    * And tell the main element to take twice as much width as the other two sidebars 
    */
   #container { flex: 2 0px; }
-  #options { order: 2; width:150px;} 
+  #options { order: 2; max-width: 300px} 
   #container { order: 1; }
 
   #footer  { order: 3; }
@@ -148,12 +152,12 @@ table, th, td {
       <tr>
         <td>Total</td>
         <td>100</td>
-        <td>10000</td>
+        <td id="total">10000</td>
       </tr>
     </table>
-    <a>Age:<select style="width:100%"></select></a>
-    <a>Sex:<select style="width:100%"></select></a>
-    <!--<a>Year:<select style="width:100%"></select></a>-->
+    <a>Age:<select></select></a>
+    <a>Sex:<select></select></a>
+    <a>Year:<select></select></a>
     <h2>Notes</h2>
   </div>
 </div>
@@ -327,6 +331,8 @@ function ready(error, data) {
                 .style("opacity", .9);
 
             d3.select('#geography').text(nameById.get(d3.select(this).attr('id'))/* + ':\n'+rateById.get(d3.select(this).attr('id'))*/)   
+
+            d3.select('#total').text(rateById.get(d3.select(this).attr('id')))
             /*div .text(function(){return rateById.get(d3.select(this).attr('id'))})  */
                 .style("left", (d3.event.pageX -100) + "px")   
                 .style("top", (d3.event.pageY + 60) + "px")
