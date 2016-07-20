@@ -7,9 +7,7 @@
   stroke:#000;
   stroke-width:.1;
 }
-html{
-  background-color:#f1eede;
-}
+
 
 .states {
   fill: none;
@@ -30,19 +28,20 @@ html{
 
 #footer {
   height: 40px;
-  width: 100%;
+  flex: 1 100%;
   background-color: #203467;
-  position: fixed;
+  /*position: fixed;
   bottom: 0;
-  left: 0;
+  left: 0;*/
 }
 #header {
   height: 88px;
-  width: 100%;
+  flex: 1 100%;
   background-color: #f1eede;
-  position: fixed;
+  margin:0px;
+  /*position: fixed;
   top: 0px;
-  left: 0px;
+  left: 0px;*/
   color:#203467;
   padding:8px;
   font-size: 40px;
@@ -51,11 +50,7 @@ html{
   background:#e0e0d1;
   border-style:solid;
   border-color:#e0e0d1 #e0e0d1 #e0e0d1 black ;
-  width:300px;
-  height:calc(100% - 40px);
-  position:fixed;
-  bottom:40px;
-  right:0px;
+  height:100%;
 
 }
 h1,h2,a{
@@ -81,66 +76,76 @@ table, th, td {
 
 }
 #container {
-  position:fixed;
+  /*position:fixed;
   top:60px;
   bottom:80px;
-  left:0px;
-  width: calc(100% - 250px);
+  left:0px;*/
+  flex: 1 100%;
   max-height:700px;
+  background-color: #f1eede;
 
 }
 
 #bigcontainer {
-  width:100%;
-  display:inline-block;
+  display: flex;
+  flex-flow: row wrap;
+}
+@media all and (min-width: 600px) {
+  /* We tell both sidebars to share a row */
+  #options { flex: 1 auto; }
 }
 
+/* Large screens */
+@media all and (min-width: 800px) {
+  /* We invert order of first sidebar and main
+   * And tell the main element to take twice as much width as the other two sidebars 
+   */
+  #container { flex: 2 0px; }
+  #options { order: 2; width:150px;} 
+  #container { order: 1; }
+
+  #footer  { order: 3; }
+}
 </style>
 <div id='bigcontainer'>
-<div id='header'>USA Population</div>
+<div id='header'>USA Population Explorer</div>
+
 <div id='container'></div>
 <div id='options'>
-  <div id='geography'>
-    <h1>County, State</h1>
+  <div id='microscope'>
+    <h1 id='geography'>County, State</h1>
     <table>
       <tr>
-        <th>Map</th>
         <th>Race/Ethnicity</th>
         <th>%</th>
         <th>Count</th>
       </tr>
       <tr>
-        <td></td>
         <td>Asian</td>
         <td>5</td>
         <td>500</td>
       </tr>
       <tr>
-        <td></td>
         <td>Black</td>
         <td>10</td>
         <td>1000</td>
       </tr>
       <tr>
-        <td></td>
         <td>Hispanic</td>
         <td>25</td>
         <td>2500</td>
       </tr>
       <tr>
-        <td></td>
         <td>Other</td>
         <td>5</td>
         <td>500</td>
       </tr>
       <tr>
-        <td></td>
         <td>White</td>
         <td>55</td>
         <td>5500</td>
       </tr>
       <tr>
-        <td>X</td>
         <td>Total</td>
         <td>100</td>
         <td>10000</td>
@@ -148,10 +153,8 @@ table, th, td {
     </table>
     <a>Age:<select style="width:100%"></select></a>
     <a>Sex:<select style="width:100%"></select></a>
-    <a>Year:<select style="width:100%"></select></a>
-    <h2>Guide</h2>
-    <a>Use this table to control what the map displays. Click next to the Race/Ethnicity group category to see the percentage displayed on the map.</a>
-    <a>Race/Ethnicity groupings are mutually exclusive, with Hispanics of any race being grouped together.</a>
+    <!--<a>Year:<select style="width:100%"></select></a>-->
+    <h2>Notes</h2>
   </div>
 </div>
 <div id='footer'></div>
@@ -323,7 +326,7 @@ function ready(error, data) {
                 .duration(200)    
                 .style("opacity", .9);
 
-            div.text(nameById.get(d3.select(this).attr('id')) + ':\n'+rateById.get(d3.select(this).attr('id')))   
+            d3.select('#geography').text(nameById.get(d3.select(this).attr('id'))/* + ':\n'+rateById.get(d3.select(this).attr('id'))*/)   
             /*div .text(function(){return rateById.get(d3.select(this).attr('id'))})  */
                 .style("left", (d3.event.pageX -100) + "px")   
                 .style("top", (d3.event.pageY + 60) + "px")
