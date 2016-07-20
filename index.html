@@ -37,24 +37,37 @@ html{
   left: 0;
 }
 #header {
-  height: 60px;
+  height: 88px;
   width: 100%;
   background-color: #f1eede;
   position: fixed;
-  top: 28px;
+  top: 0px;
   left: 0px;
   color:#203467;
   padding:8px;
-  font-size: 26px;
+  font-size: 40px;
 }
 #options {
-  background:#f36f23;
-  width:100%;
-  height:28px;
+  background:#e0e0d1;
+  border-style:solid;
+  border-color:#e0e0d1 #e0e0d1 #e0e0d1 black ;
+  width:300px;
+  height:calc(100% - 40px);
   position:fixed;
-  top:0px;
-  left:0px;
+  bottom:40px;
+  right:0px;
 
+}
+h1,h2,a{
+  color:#203467;
+  padding:10px;
+}
+table, th, td {
+  border-bottom: 1px solid #000;
+  text-align: left;
+  padding:10px;
+  width:100%;
+  color:#203467;
 }
 .tooltip { 
     position: absolute;     
@@ -63,7 +76,7 @@ html{
     background: #f36f20; 
     font: 12px sans-serif;    
     border: 0px;    
-    border-radius: 8px;     
+    border-radius: 8px;   
     pointer-events: none;    
 
 }
@@ -72,7 +85,7 @@ html{
   top:60px;
   bottom:80px;
   left:0px;
-  width:100%;
+  width: calc(100% - 250px);
   max-height:700px;
 
 }
@@ -86,7 +99,61 @@ html{
 <div id='bigcontainer'>
 <div id='header'>USA Population</div>
 <div id='container'></div>
-<div id='options'></div>
+<div id='options'>
+  <div id='geography'>
+    <h1>County, State</h1>
+    <table>
+      <tr>
+        <th>Map</th>
+        <th>Race/Ethnicity</th>
+        <th>%</th>
+        <th>Count</th>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Asian</td>
+        <td>5</td>
+        <td>500</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Black</td>
+        <td>10</td>
+        <td>1000</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Hispanic</td>
+        <td>25</td>
+        <td>2500</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Other</td>
+        <td>5</td>
+        <td>500</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>White</td>
+        <td>55</td>
+        <td>5500</td>
+      </tr>
+      <tr>
+        <td>X</td>
+        <td>Total</td>
+        <td>100</td>
+        <td>10000</td>
+      </tr>
+    </table>
+    <a>Age:<select style="width:100%"></select></a>
+    <a>Sex:<select style="width:100%"></select></a>
+    <a>Year:<select style="width:100%"></select></a>
+    <h2>Guide</h2>
+    <a>Use this table to control what the map displays. Click next to the Race/Ethnicity group category to see the percentage displayed on the map.</a>
+    <a>Race/Ethnicity groupings are mutually exclusive, with Hispanics of any race being grouped together.</a>
+  </div>
+</div>
 <div id='footer'></div>
 </div>
 <script src="//d3js.org/d3.v4.min.js"></script>
@@ -158,7 +225,7 @@ set_dataset = {
   },
   path: 'data/',
   idvar: 'ID',
-  focus: "race", //Set to one of control options
+  focus: "Race", //Set to one of control options
   focusSelect: "TOT", //Set to focus option code
   file: "Age0Sex0.tsv",//take any control options not in focus in order in format "OPTIONCODE", should be a tsv
   tooltip: {
@@ -219,6 +286,15 @@ function zoomed() {
 d3.json('countytopo.json',function(dat){
   console.log(dat)
 })
+
+focusVarCodes = []
+set_dataset.controlOptions[set_dataset.focus].forEach(function(thing){
+  focusVarCodes.push(thing.code)
+})
+console.log(focusVarCodes)
+
+
+
 d3.queue()
     .defer(d3.json, target_json)
     .defer(d3.tsv, (set_dataset.path + set_dataset.file), function(d) { rateById.set(d.ID, eval('+d.'+set_dataset.controlOptions.Race[0].code)); nameById.set(d.ID,d.CTYNAME)})
