@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
 <style>
 
 .counties {
@@ -35,7 +37,6 @@
   left: 0;*/
 }
 #header {
-  height: 88px;
   flex: 1 100%;
   background-color: #203467;
   margin:0px;
@@ -44,34 +45,42 @@
   left: 0px;*/
   color:white;
   padding:8px;
-  font-size: 40px;
+  font-size: 20px;
+  font-family: Garamond;
+  font-weight:bold;
 }
 #options {
   background:#e0e0d1;
-  border-style:solid;
-  border-color:#e0e0d1 #e0e0d1 #e0e0d1 black ;
-  max-width:100%;
-  min-height:400px;
+  max-width:50%;
+  min-height:380px;
   flex: 1 0px;
+  text-align:center;
+  color:#235281;
+  padding-left:25%;
+  padding-right:25%;
 }
 h1,h2,a{
   color:#203467;
-  padding:10px;
 }
-table, th, td{
+th, td{
   border-bottom: 1px solid #000;
-  text-align: left;
-  padding:10px;
-  width:100%;
-  color:#203467;
+  border-spacing:0px;
+  padding:5px;
+  margin:0px;
+
+
+}
+table{
+  border-spacing:0;
+  font-family: Garamond;
 }
 select{
-  width:100%;
+  width:50px;
 }
 .tooltip { 
     position: absolute;     
     text-align: center;      
-    padding: 2px;       
+    padding: 0px;       
     background: #f36f20; 
     font: 12px sans-serif;    
     border: 0px;    
@@ -85,14 +94,52 @@ select{
   bottom:80px;
   left:0px;*/
   flex: 1 100%;
-  max-height:700px;
+  max-height:500px;
   background-color: #f1eede;
+  overflow:hidden;
 
 }
+.count {
+  text-align:right;
+  width:35%;
+  color:white;
+}
+.race {
+  text-align:left;
+  color:white;
+}
+.percent {
+  color:white;
+}
+.total {
+  background-color:#235281;
+}
+.white {
+  background-color:#CF7800;
+}
+.other {
+  background-color:#9e2a2b;
+}
+.hispanic {
+  background-color:#007681;
+}
 
+.black {
+  background-color:#a8ad00;
+}
+.asian {
+  background-color: #26004d;
+}
+.headers th{
+  color:navy;
+}
+.selected {
+  opacity:1;
+}
 #bigcontainer {
   display: flex;
   flex-flow: row wrap;
+  max-height:750px;
 }
 /*@media all and (min-width: 600px) {
   /* We tell both sidebars to share a row */
@@ -100,59 +147,86 @@ select{
 }*/
 
 /* Large screens */
-@media all and (min-width: 1200px) {
+@media all and (min-width: 950px) {
   /* We invert order of first sidebar and main
    * And tell the main element to take twice as much width as the other two sidebars 
    */
   #container { flex: 2 0px; }
-  #options { order: 2; max-width: 300px} 
+  #options { order: 2; max-width: 250px;  padding-left:0%;
+  padding-right:0%;} 
   #container { order: 1; }
-
   #footer  { order: 3; }
+  #header {
+    font-size:40px;
+  }
 }
 </style>
 <div id='bigcontainer'>
-<div id='header'>USA Population Explorer</div>
+<div id='header'>USA Total Population - 2015 Estimates</div>
 
 <div id='container'></div>
 <div id='options'>
   <div id='microscope'>
-    <h1 id='geography'>County, State</h1>
-    <table>
-      <tr>
-        <th>Race/Ethnicity</th>
-        <th>%</th>
-        <th>Count</th>
+    <h3 id='geography'>County, State</h3>
+    <table style="width:100%">
+      <tr class="headers">
+        <th class="race">Race/Ethnicity</th>
+        <th class="percent">%</th>
+        <th class="count">Count</th>
       </tr>
-      <tr>
-        <td>Asian</td>
-        <td>5</td>
-        <td>500</td>
+      <tr class = "asian">
+        <td class = "race">
+          <div class="radio">
+            <label><input type="radio" id='regular' name="optradio">Asian</label>
+          </div>
+        </td>
+        <td class="percent">5</td>
+        <td class="count">500</td>
       </tr>
-      <tr>
-        <td>Black</td>
-        <td>10</td>
-        <td>1000</td>
+      <tr class = "black">
+        <td class = "race">
+          <div class="radio">
+            <label><input type="radio" id='regular' name="optradio">Black</label>
+          </div>
+        </td>
+        <td class="percent">10</td>
+        <td class="count">1000</td>
       </tr>
-      <tr>
-        <td>Hispanic</td>
-        <td>25</td>
-        <td>2500</td>
+      <tr class="hispanic">
+        <td class = "race">
+          <div class="radio">
+            <label><input type="radio" id='regular' name="optradio">Hispanic</label>
+          </div>
+        </td>
+        <td class="percent">25</td>
+        <td class="count">2500</td>
       </tr>
-      <tr>
-        <td>Other</td>
-        <td>5</td>
-        <td>500</td>
+      <tr class="other">
+        <td class = "race">
+          <div class="radio">
+            <label><input type="radio" id='regular' name="optradio">Other</label>
+          </div>
+        </td>
+        <td class="percent">5</td>
+        <td class="count">500</td>
       </tr>
-      <tr>
-        <td>White</td>
-        <td>55</td>
-        <td>5500</td>
+      <tr class="white">
+        <td class = "race">
+          <div class="radio">
+            <label><input type="radio" id='regular' name="optradio">White</label>
+          </div>
+        </td>
+        <td class="percent">55</td>
+        <td class="count">5500</td>
       </tr>
-      <tr>
-        <td>Total</td>
-        <td>100</td>
-        <td id="total">10000</td>
+      <tr class="total selected">
+        <td class = "race">
+          <div class="radio">
+            <label><input type="radio" id='regular' name="optradio">Total</label>
+          </div>
+        </td>
+        <td class="percent">100</td>
+        <td id="total" class="count">10000</td>
       </tr>
     </table>
     <a>Age:<select></select></a>
@@ -277,10 +351,6 @@ var projection = d3.geoAlbersUsa()
 var path = d3.geoPath()
     .projection(projection);
 
-var div = d3.select("html").append("a") 
-    .attr("class", "tooltip")       
-    .style("opacity", 0);
-
 if(set_geography==='county'){
   target_json = 'countytopo.json'
 }
@@ -326,10 +396,6 @@ function ready(error, data) {
 
                // rateById.get(d3.select(this).attr('id'))
 
-            div.transition()    
-                .duration(200)    
-                .style("opacity", .9);
-
             d3.select('#geography').text(nameById.get(d3.select(this).attr('id'))/* + ':\n'+rateById.get(d3.select(this).attr('id'))*/)   
 
             d3.select('#total').text(rateById.get(d3.select(this).attr('id')))
@@ -345,10 +411,7 @@ function ready(error, data) {
 
                 var currentState = this;
                 d3.select(this).transition().duration(200).style('fill',null).style('stroke',null);
-
-                            div.transition()    
-                .duration(500)    
-                .style("opacity", 0);          
+      
         });    
   }
 
@@ -369,7 +432,7 @@ g.append("g")
   zoom = d3.zoom()
     //.translateBy(0, 0)
     //.scaleBy(1)
-    .scaleExtent([1, 50])
+    .scaleExtent([.5, 50])
     .on("zoom", zoomed);
 
   svg
