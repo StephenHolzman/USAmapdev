@@ -46,18 +46,17 @@
   color:white;
   padding:8px;
   font-size: 20px;
-  font-family: Garamond;
-  font-weight:bold;
+  font-family:franklin-gothic-urw,sans-serif;
 }
 #options {
   background:#e0e0d1;
-  max-width:50%;
+  max-width:70%;
   min-height:380px;
   flex: 1 0px;
   text-align:center;
   color:#235281;
-  padding-left:25%;
-  padding-right:25%;
+  padding-left:15%;
+  padding-right:15%;
 }
 h1,h2,a{
   color:#203467;
@@ -74,9 +73,18 @@ table{
   border-spacing:0;
   font-family: Garamond;
 }
-select{
-  width:50px;
+.selector{
+  text-align:left;
+  height:20px;
+  padding:3px;
 }
+select{
+  float:right;
+  width:85%;
+  padding:0;
+  margin:0;
+}
+
 .tooltip { 
     position: absolute;     
     text-align: center;      
@@ -228,16 +236,17 @@ select{
         <td class="percent">100</td>
         <td id="total" class="count">10000</td>
       </tr>
+
     </table>
-    <a>Age:<select></select></a>
-    <a>Sex:<select></select></a>
-    <a>Year:<select></select></a>
-    <h2>Notes</h2>
+    <div class="selector" style="width=100%;"><a>Age:<select></select></a></div>    
+    <div class="selector" style="width=100%;"><a>Sex:<select></select></a></div>
+
+
   </div>
 </div>
 <div id='footer'></div>
 </div>
-<script src="//d3js.org/d3.v4.min.js"></script>
+<script src="/node_modules/d3/build/d3.min.js"></script>
 <script src="//d3js.org/topojson.v1.min.js"></script>
 <script>
 
