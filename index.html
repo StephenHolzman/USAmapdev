@@ -32,6 +32,8 @@
   height: 40px;
   flex: 1 100%;
   background-color: #203467;
+  color:white;
+  padding:4px;
   /*position: fixed;
   bottom: 0;
   left: 0;*/
@@ -46,7 +48,7 @@
   color:white;
   padding:8px;
   font-size: 20px;
-  font-family:franklin-gothic-urw,sans-serif;
+  font-family:Adobe Caslon Pro;
 }
 #options {
   background:#e0e0d1;
@@ -174,8 +176,10 @@ select{
 
 <div id='container'></div>
 <div id='options'>
-  <div id='microscope'>
+  <!--<div id='microscope'>-->
+  <!--
     <h3 id='geography'>County, State</h3>
+
     <table style="width:100%">
       <tr class="headers">
         <th class="race">Race/Ethnicity</th>
@@ -188,8 +192,8 @@ select{
             <label><input type="radio" id='regular' name="optradio">Asian</label>
           </div>
         </td>
-        <td class="percent">5</td>
-        <td class="count">500</td>
+        <td id="asianPercent" class="percent">5</td>
+        <td id="asianCount" class="count">500</td>
       </tr>
       <tr class = "black">
         <td class = "race">
@@ -197,8 +201,8 @@ select{
             <label><input type="radio" id='regular' name="optradio">Black</label>
           </div>
         </td>
-        <td class="percent">10</td>
-        <td class="count">1000</td>
+        <td id="blackPercent" class="percent">10</td>
+        <td id="blackCount" class="count">1000</td>
       </tr>
       <tr class="hispanic">
         <td class = "race">
@@ -206,8 +210,8 @@ select{
             <label><input type="radio" id='regular' name="optradio">Hispanic</label>
           </div>
         </td>
-        <td class="percent">25</td>
-        <td class="count">2500</td>
+        <td id="hispanicPercent" class="percent">25</td>
+        <td id="hispanicCount" class="count">2500</td>
       </tr>
       <tr class="other">
         <td class = "race">
@@ -215,8 +219,8 @@ select{
             <label><input type="radio" id='regular' name="optradio">Other</label>
           </div>
         </td>
-        <td class="percent">5</td>
-        <td class="count">500</td>
+        <td id="otherPercent" class="percent">5</td>
+        <td id="otherCount" class="count">500</td>
       </tr>
       <tr class="white">
         <td class = "race">
@@ -224,8 +228,8 @@ select{
             <label><input type="radio" id='regular' name="optradio">White</label>
           </div>
         </td>
-        <td class="percent">55</td>
-        <td class="count">5500</td>
+        <td id="whitePercent" class="percent">55</td>
+        <td id="whiteCount" class="count">5500</td>
       </tr>
       <tr class="total selected">
         <td class = "race">
@@ -233,54 +237,116 @@ select{
             <label><input type="radio" id='regular' name="optradio">Total</label>
           </div>
         </td>
-        <td class="percent">100</td>
-        <td id="total" class="count">10000</td>
+        <td class="percent">100%</td>
+        <td id="totalCount" class="count">10000</td>
       </tr>
-
     </table>
-    <div class="selector" style="width=100%;"><a>Age:<select></select></a></div>    
-    <div class="selector" style="width=100%;"><a>Sex:<select></select></a></div>
 
+    <div class="selector" style="width=100%;">
+      <a>Age:
+        <select>
+          <option>All Ages</option>
+          <option>0 to 4</option>
+          <option>5 to 9</option>
+          <option>10 to 14</option>
+          <option>15 to 19</option>
+          <option>20 to 24</option>
+          <option>25 to 29</option>
+          <option>30 to 34</option>
+          <option>35 to 39</option>
+          <option>40 to 44</option>
+          <option>45 to 49</option>
+          <option>50 to 54</option>
+          <option>55 to 59</option>
+          <option>60 to 64</option>
+          <option>65 to 69</option>
+          <option>70 to 74</option>
+          <option>75 to 79</option>
+          <option>80 to 84</option>
+          <option>85+</option>
+        </select>
+      </a>
+    </div>  
 
-  </div>
+    <div class="selector" style="width=100%;">
+      <a>Sex:
+        <select>
+          <option>All</option>
+          <option>Female</option>
+          <option>Male</option>
+        </select>
+      </a>
+    </div>
+-->
+  <!--</div>-->
 </div>
-<div id='footer'></div>
+<div id='footer'>
+  <div id="author">@StephenHolz</div>
+  <div id="cite">Source: Census Bureau</div>
+</div>
 </div>
 <script src="/node_modules/d3/build/d3.min.js"></script>
-<script src="//d3js.org/topojson.v1.min.js"></script>
+<script src="/node_modules/topojson/build/topojson.min.js"></script>
 <script>
 
 //set unique map specific parameters here
 set_geography = 'county' //options are county, state, congress, puma
 set_dataset = {
   controlOptions: {
-    "Race": [
-      {
-        code: "TOT_POP",
-        label: "Total Population"
-      },
-      {
-        code: "NHAA",
-        label: "Asian (non-Hispanic)"
-      },
-      {
-        code: "NHBA",
-        label: "Black (non-Hispanic)"
-      },
-      {
-        code: "NHWA",
-        label: "White (non-Hispanic)"
-      },
-      {
-        code: "NHOT",
-        label: "Other (non-Hispanic)"
-      },
-      {
-        code: "H",
-        label: "Hispanic (any race)"
+    "Race": { 
+      datastuff:[
+        {
+          code: "NHAA_ALL",
+          label: "Asian",
+          colorgradient: ['#FFFFFF','#E6E2EB','#CEC6D7','#B6AAC3','#9E8DAF','#86719C','#6E5588','#563874','#3E1C60',"#26004D"]
+        },
+        {
+          code: "NHBA_ALL",
+          label: "Black",
+          colorgradient: ['#FFFFFF','#F4E7E7','#E9CFCF','#DEB8B8','#D3A0A0','#C98889','#B37171','#B3595A','#A84142',"#9E2A2B"]
+        },
+        {
+          code: "H_ALL",
+          label: "Hispanic",
+          colorgradient: ['#FFFFFF','#F9F0E2','#F4E1C6','#EFD2AA','#E9C38D','#E4B471']
+        },
+        {
+          code: "OTHER_ALL",
+          label: "Other", 
+          colorgradient: ['#FFFFFF','#F4E7E7','#E9CFCF','#DEB8B8','#D3A0A0','#C98889','#B37171','#B3595A','#A84142',"#9E2A2B"]
+        },
+        {
+          code: "NHWA_ALL",
+          label: "White",
+          colorgradient: ['#FFFFFF','#F9F0E2','#F4E1C6','#EFD2AA','#E9C38D','#E4B471','#DFA555','#D9963B','#D4871C',"#CF7800"]
+        },
+        {
+          code: "TOT_POP",
+          label: "Total",
+          colorgradient: ['#FFFFFF','#E6EBF1','#CED8E3','#B5C5D5','#9DB2C7','#849EB9','#6C8BAB','#53789D','#3B658F',"#235281"]
+        }
+      ],
+      interface: {
+        type: "table",
+        columns: [
+          {
+            label: "Race/Ethnicity",
+            type: "self"
+          },
+          {
+            label: "%",
+            type: "percent",
+            denominatorcode: "TOT_POP"
+          },
+          {
+            label: "Count",
+            type: "value"
+          }
+        ]
       }
-    ],
-    "Age": [
+    },
+    "Age": {
+      datastuff: [
       {
         code: 0,
         label: "All"
@@ -296,9 +362,74 @@ set_dataset = {
       {
         code: 3,
         label: "10 to 14"
+      },
+      {
+        code: 4,
+        label: "15 to 19"
+      },
+      {
+        code: 5,
+        label: "20 to 24"
+      },
+      {
+        code: 6,
+        label: "25 to 29"
+      },
+      {
+        code: 7,
+        label: "30 to 34"
+      },
+      {
+        code: 8,
+        label: "35 to 39"
+      },
+      {
+        code: 9,
+        label: "40 to 44"
+      },
+      {
+        code: 10,
+        label: "45 to 49"
+      },
+      {
+        code: 11,
+        label: "50 to 54"
+      },
+      {
+        code: 12,
+        label: "55 to 59"
+      },
+      {
+        code: 13,
+        label: "60 to 64"
+      },
+      {
+        code: 14,
+        label: "65 to 69"
+      },
+      {
+        code: 15,
+        label: "70 to 74"
+      },
+      {
+        code: 16,
+        label: "75 to 79"
+      },
+      {
+        code: 17,
+        label: "80 to 84"
+      },
+      {
+        code: 18,
+        label: "85+"
       }
     ],
-    "Sex": [
+      interface: {
+        type: "select",
+      }
+  },
+    "Sex": {
+      datastuff: [
       {
         code: 0,
         label: "All"
@@ -311,11 +442,16 @@ set_dataset = {
         code: 2,
         label: "Male"
       }
-    ]
+    ],
+      interface: {
+        type: "select",
+      }
+  }
   },
   path: 'data/',
   idvar: 'ID',
   focus: "Race", //Set to one of control options
+  geovar: 'CTYNAME', 
   focusSelect: "TOT", //Set to focus option code
   file: "Age0Sex0.tsv",//take any control options not in focus in order in format "OPTIONCODE", should be a tsv
   tooltip: {
@@ -328,6 +464,15 @@ set_dataset = {
 //See Mike Bostock's incredible D3 examples at bl.ocks.org for further general understanding.
 //Almost all code was informed by one example or another.
 //Which, by the way, thanks to Bostock for developing this library!
+
+
+focusVarCodes = []
+set_dataset.controlOptions[set_dataset.focus].datastuff.forEach(function(thing){
+  focusVarCodes.push(thing.code)
+})
+console.log(focusVarCodes)
+
+// Outputs: ["Frodo", "Aslan"]
 
 margin = {top: 0, left: 0, bottom: 0, right: 0}
   , width = parseInt(d3.select('#container').style('width'))
@@ -346,12 +491,18 @@ g = svg.append('g')
     //height = +svg.attr("height");
 
 var rateById = d3.map();
-
 var nameById = d3.map();
+var hispById = d3.map();
+var asianById = d3.map();
+var blackById = d3.map();
+var otherById = d3.map();
+var whiteById = d3.map();
+
+var allEstimateById = d3.map();
 
 var quantize = d3.scaleQuantize()
-    .domain([0, 150000])
-    .range(d3.range(9).map(function(i) { return "q" + i + "-9"; }));
+    .domain([0, 200000])
+    .range(d3.range(9).map(function(i) { /*return "q" + i + "-9";*/ return set_dataset.controlOptions.Race.datastuff[5].colorgradient[i] }));
 
 var projection = d3.geoAlbersUsa()
     .scale(width)
@@ -369,25 +520,89 @@ function zoomed() {
   g.attr("transform", d3.event.transform);
 
 }
-d3.json('countytopo.json',function(dat){
-  console.log(dat)
-})
 
-focusVarCodes = []
-set_dataset.controlOptions[set_dataset.focus].forEach(function(thing){
-  focusVarCodes.push(thing.code)
-})
-console.log(focusVarCodes)
 
+function returnValueObj(d) {
+  returnList = {}
+
+  //returnList["TOT_POP"] = d["TOT_POP"]
+  returnList[set_dataset.idvar] = d[set_dataset.idvar]
+  returnList[set_dataset.geovar] = d[set_dataset.geovar]
+  set_dataset.controlOptions[set_dataset.focus].datastuff.forEach(function(thing){
+    returnList[thing.code] = d[thing.code]
+  }) 
+  return returnList
+}
+
+featuredMapVar = 5
+
+function addControls(option){
+
+  if(set_dataset.controlOptions[option].interface.type==='table'){
+
+    d3.select("#options")
+      .append("table")
+      .attr("id",option+"table")
+
+    var tableheaders = d3.select("#"+option+"table")
+      .append("tr")
+
+    set_dataset.controlOptions[option].interface.columns.forEach(function(d){
+        tableheaders.append("th").text(d.label)
+    })
+
+    set_dataset.controlOptions[option].datastuff.forEach(function(d){
+      var row = d3.select("#"+option+"table")
+        .append("tr").attr('id',d.code)
+
+      set_dataset.controlOptions[option].interface.columns.forEach(function(col){
+          if(col.type==="self"){
+            row.append("th").attr('class',col.type).text(d.label)
+          }else{
+            row.append("th").attr('class',col.type)
+          }
+      })
+
+    })
+  }else if(set_dataset.controlOptions[option].interface.type==='select'){
+    var selector = d3.select('#options')
+      .append('div')
+      .append('select')
+    
+    set_dataset.controlOptions[option].datastuff.forEach(function(d){
+          selector.append("option").attr('code',d.code).text(d.label)
+      })
+  }
+}
+
+
+d3.select("#options").append("h3").attr("id","geography").text("Geography Title")
+
+for (var prop in set_dataset.controlOptions) {
+    if (set_dataset.controlOptions.hasOwnProperty(prop)) {
+        //varNames.push(prop);
+        addControls(prop)
+        
+    }
+}
 
 
 d3.queue()
     .defer(d3.json, target_json)
-    .defer(d3.tsv, (set_dataset.path + set_dataset.file), function(d) { rateById.set(d.ID, eval('+d.'+set_dataset.controlOptions.Race[0].code)); nameById.set(d.ID,d.CTYNAME)})
+    .defer(d3.tsv, (set_dataset.path + set_dataset.file), function(d) { rateById.set(d.ID, eval('+d.'+set_dataset.controlOptions[set_dataset.focus].datastuff[5].code)); nameById.set(d.ID,d.CTYNAME);/*asianById.set(d.ID,eval('+d.'+set_dataset.controlOptions.Race[0].code));blackById.set(d.ID,eval('+d.'+set_dataset.controlOptions.Race[1].code));hispById.set(d.ID,eval('+d.'+set_dataset.controlOptions.Race[2].code));otherById.set(d.ID,eval('+d.'+set_dataset.controlOptions.Race[3].code));whiteById.set(d.ID,eval('+d.'+set_dataset.controlOptions.Race[4].code));*/allEstimateById.set(d.ID,returnValueObj(d))})
     .await(ready);
 
 function ready(error, data) {
   if (error) throw error;
+
+ var varNames = [ ];
+
+  /*for (var prop in set_dataset.controlOptions) {
+      if (set_dataset.controlOptions.hasOwnProperty(prop)) {
+          varNames.push(prop);
+      }
+  }*/
+
   
   if(set_geography==='county'){
     g.append("g")
@@ -395,7 +610,7 @@ function ready(error, data) {
       .selectAll("path")
         .data(topojson.feature(data, data.objects.counties).features)
       .enter().append("path")
-        .attr("class", function(d) { return quantize(rateById.get(d.id)); })
+        .attr("fill", function(d) { return quantize(rateById.get(d.id)); })
         .attr('id',function(d){return d.id})
         .attr("d", path)
         .on('mouseover', function(d, i) {
@@ -407,7 +622,31 @@ function ready(error, data) {
 
             d3.select('#geography').text(nameById.get(d3.select(this).attr('id'))/* + ':\n'+rateById.get(d3.select(this).attr('id'))*/)   
 
-            d3.select('#total').text(rateById.get(d3.select(this).attr('id')))
+            var newData = allEstimateById.get(d3.select(this).attr('id'));
+            
+            //d3.select("#NHAA_ALL").select(".value").text(newData.NHAA_ALL)
+            for (var prop in newData) {
+                if (newData.hasOwnProperty(prop)) {
+                    //varNames.push(prop);
+                    d3.select("#"+prop).select(".value").text(newData[prop])
+                    d3.select("#"+prop).select(".percent").text(Math.round(100*newData[prop]/newData.TOT_POP)+"%")
+                }
+            }
+  
+
+
+            d3.select('#totalCount').text(rateById.get(d3.select(this).attr('id')))
+            d3.select('#whiteCount').text(whiteById.get(d3.select(this).attr('id')))
+            d3.select('#asianCount').text(asianById.get(d3.select(this).attr('id')))
+            d3.select('#blackCount').text(blackById.get(d3.select(this).attr('id')))
+            d3.select('#otherCount').text(otherById.get(d3.select(this).attr('id')))
+            d3.select('#hispanicCount').text(hispById.get(d3.select(this).attr('id')))
+
+            d3.select('#whitePercent').text((Math.round(100*whiteById.get(d3.select(this).attr('id'))/rateById.get(d3.select(this).attr('id'))))+"%")
+            d3.select('#asianPercent').text((Math.round(100*asianById.get(d3.select(this).attr('id'))/rateById.get(d3.select(this).attr('id'))))+"%")
+            d3.select('#blackPercent').text((Math.round(100*blackById.get(d3.select(this).attr('id'))/rateById.get(d3.select(this).attr('id'))))+"%")
+            d3.select('#otherPercent').text((Math.round(100*otherById.get(d3.select(this).attr('id'))/rateById.get(d3.select(this).attr('id'))))+"%")
+            d3.select('#hispanicPercent').text((Math.round(100*hispById.get(d3.select(this).attr('id'))/rateById.get(d3.select(this).attr('id'))))+"%")
             /*div .text(function(){return rateById.get(d3.select(this).attr('id'))})  */
                 .style("left", (d3.event.pageX -100) + "px")   
                 .style("top", (d3.event.pageY + 60) + "px")
