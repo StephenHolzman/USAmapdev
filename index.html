@@ -74,6 +74,8 @@ th, td{
 table{
   border-spacing:0;
   font-family: Garamond;
+  color:white;
+  width:100%;
 }
 .selector{
   text-align:left;
@@ -162,7 +164,7 @@ select{
    * And tell the main element to take twice as much width as the other two sidebars 
    */
   #container { flex: 2 0px; }
-  #options { order: 2; max-width: 250px;  padding-left:0%;
+  #options { order: 2; max-width: 270px;  padding-left:0%;
   padding-right:0%;} 
   #container { order: 1; }
   #footer  { order: 3; }
@@ -298,32 +300,38 @@ set_dataset = {
         {
           code: "NHAA_ALL",
           label: "Asian",
-          colorgradient: ['#FFFFFF','#E6E2EB','#CEC6D7','#B6AAC3','#9E8DAF','#86719C','#6E5588','#563874','#3E1C60',"#26004D"]
+          colorgradient: ['#FFFFFF','#E6E2EB','#CEC6D7','#B6AAC3','#9E8DAF','#86719C','#6E5588','#563874','#3E1C60',"#26004D"],
+          display: false
         },
         {
           code: "NHBA_ALL",
           label: "Black",
-          colorgradient: ['#FFFFFF','#F4E7E7','#E9CFCF','#DEB8B8','#D3A0A0','#C98889','#B37171','#B3595A','#A84142',"#9E2A2B"]
+          colorgradient: ['#FFFFFF','#F5F5E2','#EBECC6','#E2E3AA','#D8DA8D','#CED171','#C5C855','#BBBF38','#B1B61C',"#A8AD00"],
+          display: false
         },
         {
           code: "H_ALL",
           label: "Hispanic",
-          colorgradient: ['#FFFFFF','#F9F0E2','#F4E1C6','#EFD2AA','#E9C38D','#E4B471']
+          colorgradient: ['#FFFFFF','#E2EFF1','#C6E0E3','#AAD1D5','#8DC2C7','#71B2B9','#55A3AB','#38949D','#1C858F','#007681'],
+          display: false
         },
         {
           code: "OTHER_ALL",
           label: "Other", 
-          colorgradient: ['#FFFFFF','#F4E7E7','#E9CFCF','#DEB8B8','#D3A0A0','#C98889','#B37171','#B3595A','#A84142',"#9E2A2B"]
+          colorgradient: ['#FFFFFF','#F4E7E7','#E9CFCF','#DEB8B8','#D3A0A0','#C98889','#B37171','#B3595A','#A84142',"#9E2A2B"],
+          display: false
         },
         {
           code: "NHWA_ALL",
           label: "White",
-          colorgradient: ['#FFFFFF','#F9F0E2','#F4E1C6','#EFD2AA','#E9C38D','#E4B471','#DFA555','#D9963B','#D4871C',"#CF7800"]
+          colorgradient: ['#FFFFFF','#F9F0E2','#F4E1C6','#EFD2AA','#E9C38D','#E4B471','#DFA555','#D9963B','#D4871C',"#CF7800"],
+          display: false
         },
         {
           code: "TOT_POP",
           label: "Total",
-          colorgradient: ['#FFFFFF','#E6EBF1','#CED8E3','#B5C5D5','#9DB2C7','#849EB9','#6C8BAB','#53789D','#3B658F',"#235281"]
+          colorgradient: ['#FFFFFF','#E6EBF1','#CED8E3','#B5C5D5','#9DB2C7','#849EB9','#6C8BAB','#53789D','#3B658F',"#235281"],
+          display: true
         }
       ],
       interface: {
@@ -349,7 +357,7 @@ set_dataset = {
       datastuff: [
       {
         code: 0,
-        label: "All"
+        label: "All Ages"
       },
       {
         code: 1,
@@ -432,7 +440,7 @@ set_dataset = {
       datastuff: [
       {
         code: 0,
-        label: "All"
+        label: "All Sexes"
       },
       {
         code: 1,
@@ -502,8 +510,28 @@ var allEstimateById = d3.map();
 
 var quantize = d3.scaleQuantize()
     .domain([0, 200000])
-    .range(d3.range(9).map(function(i) { /*return "q" + i + "-9";*/ return set_dataset.controlOptions.Race.datastuff[5].colorgradient[i] }));
+    .range(d3.range(9).map(function(d,i) { /*return "q" + i + "-9";*/ return set_dataset.controlOptions.Race.datastuff[5].colorgradient[i] }));
+/*
+var quantize = d3.scaleQuantize()
+  .domain([0, 200000])
+  .range(d3.range(9).map(function(d,i){
+    var displayVars = []
+    set_dataset.controlOptions["Race"].datastuff.forEach(function(variable){
+      if(variable.display){
+        displayVars.push(variable.code)
+      }
+    })
 
+    if(displayVars.length===1){
+      set_dataset.controlOptions["Race"].datastuff.forEach(function(variable,index){
+        if(variable.code===displayVars[0]){
+          return variable    
+        }
+
+      })
+    }
+  }))
+*/
 var projection = d3.geoAlbersUsa()
     .scale(width)
     .translate([width / 2, height / 2]);
@@ -522,15 +550,15 @@ function zoomed() {
 }
 
 
-function returnValueObj(d) {
+function returnValueObj(obj) {
   returnList = {}
 
   //returnList["TOT_POP"] = d["TOT_POP"]
-  returnList[set_dataset.idvar] = d[set_dataset.idvar]
-  returnList[set_dataset.geovar] = d[set_dataset.geovar]
+  returnList[set_dataset.idvar] = obj[set_dataset.idvar]
+  returnList[set_dataset.geovar] = obj[set_dataset.geovar]
   set_dataset.controlOptions[set_dataset.focus].datastuff.forEach(function(thing){
-    returnList[thing.code] = d[thing.code]
-  }) 
+    returnList[thing.code] = +obj[thing.code]
+  })
   return returnList
 }
 
@@ -547,19 +575,32 @@ function addControls(option){
     var tableheaders = d3.select("#"+option+"table")
       .append("tr")
 
+    tableheaders.append('th').text('Map')
     set_dataset.controlOptions[option].interface.columns.forEach(function(d){
         tableheaders.append("th").text(d.label)
     })
 
     set_dataset.controlOptions[option].datastuff.forEach(function(d){
+      
+
       var row = d3.select("#"+option+"table")
-        .append("tr").attr('id',d.code)
+        .append("tr")
+        .attr('id',d.code)
+        .style('width','100%')
+        .style("background-color",d.colorgradient[d.colorgradient.length-1])
+      
+
+      row.append('th').style('width','10%').append("input").attr('code',d.code).attr("type","checkbox")
+
+
 
       set_dataset.controlOptions[option].interface.columns.forEach(function(col){
           if(col.type==="self"){
-            row.append("th").attr('class',col.type).text(d.label)
+            row.append("th").attr('class',col.type).text(d.label).style('width','30%').style('text-align','left')
+          }else if(col.type==="value"){
+            row.append("th").attr('class',col.type).text(d.label).style('width','40%').style('text-align','right')
           }else{
-            row.append("th").attr('class',col.type)
+            row.append("th").attr('class',col.type).style('text-align','center').style('width','20%')
           }
       })
 
@@ -587,6 +628,9 @@ for (var prop in set_dataset.controlOptions) {
 }
 
 
+
+
+
 d3.queue()
     .defer(d3.json, target_json)
     .defer(d3.tsv, (set_dataset.path + set_dataset.file), function(d) { rateById.set(d.ID, eval('+d.'+set_dataset.controlOptions[set_dataset.focus].datastuff[5].code)); nameById.set(d.ID,d.CTYNAME);/*asianById.set(d.ID,eval('+d.'+set_dataset.controlOptions.Race[0].code));blackById.set(d.ID,eval('+d.'+set_dataset.controlOptions.Race[1].code));hispById.set(d.ID,eval('+d.'+set_dataset.controlOptions.Race[2].code));otherById.set(d.ID,eval('+d.'+set_dataset.controlOptions.Race[3].code));whiteById.set(d.ID,eval('+d.'+set_dataset.controlOptions.Race[4].code));*/allEstimateById.set(d.ID,returnValueObj(d))})
@@ -603,15 +647,18 @@ function ready(error, data) {
       }
   }*/
 
-  
+
   if(set_geography==='county'){
     g.append("g")
         .attr("class", "counties")
       .selectAll("path")
         .data(topojson.feature(data, data.objects.counties).features)
       .enter().append("path")
-        .attr("fill", function(d) { return quantize(rateById.get(d.id)); })
+        //.attr("fill", function(d) { return quantize(rateById.get(d.id)); })
         .attr('id',function(d){return d.id})
+        .attr("fill", function(d) {
+            return quantize(rateById.get(d.id)); 
+        })
         .attr("d", path)
         .on('mouseover', function(d, i) {
 
@@ -634,7 +681,7 @@ function ready(error, data) {
             }
   
 
-
+/*
             d3.select('#totalCount').text(rateById.get(d3.select(this).attr('id')))
             d3.select('#whiteCount').text(whiteById.get(d3.select(this).attr('id')))
             d3.select('#asianCount').text(asianById.get(d3.select(this).attr('id')))
@@ -647,12 +694,12 @@ function ready(error, data) {
             d3.select('#blackPercent').text((Math.round(100*blackById.get(d3.select(this).attr('id'))/rateById.get(d3.select(this).attr('id'))))+"%")
             d3.select('#otherPercent').text((Math.round(100*otherById.get(d3.select(this).attr('id'))/rateById.get(d3.select(this).attr('id'))))+"%")
             d3.select('#hispanicPercent').text((Math.round(100*hispById.get(d3.select(this).attr('id'))/rateById.get(d3.select(this).attr('id'))))+"%")
-            /*div .text(function(){return rateById.get(d3.select(this).attr('id'))})  */
+            /*div .text(function(){return rateById.get(d3.select(this).attr('id'))})  
                 .style("left", (d3.event.pageX -100) + "px")   
                 .style("top", (d3.event.pageY + 60) + "px")
                 .style("font", window.innerWidth/20);  
 
-                
+     */           
 
         })
         .on('mouseout',function(d, i){
@@ -686,6 +733,43 @@ g.append("g")
   svg
     .call(zoom) // delete this line to disable free zooming
     .call(zoom.transform, d3.zoomIdentity);
+
+
+//Table Controls
+
+d3.selectAll('input').property("checked",false)
+d3.select('#TOT_POP').selectAll('th').selectAll('input').property('checked',true)
+d3.selectAll('input').on("change",function(){
+  var currentCode = d3.select(this).attr("code")
+  //When Total is Selected
+  if(d3.select(this).attr("code")==="TOT_POP"){
+    d3.selectAll('input').property('checked',false)
+    d3.select(this).property('checked',true)
+
+    set_dataset.controlOptions["Race"].datastuff.forEach(function(d){
+      d.display = false
+      if(d.code==="TOT_POP"){
+        d.display = true
+      }
+
+    })
+
+
+  }else{
+    d3.select('#TOT_POP').selectAll('th').selectAll('input').property('checked',false)
+    console.log(currentCode)
+    set_dataset.controlOptions["Race"].datastuff.forEach(function(d){
+      if(d.code==="TOT_POP"){
+        d.display = false
+      }else if(d.code===currentCode){
+        d.display = !d.display
+      }
+
+    })
+  }
+
+
+})
 }
 
 </script>
