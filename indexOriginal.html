@@ -1,27 +1,9 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1.0, user-scalable=no">
 
-<div id='bigcontainer'>
-	<div id='header'>USA Total Population - 2015 Estimates</div>
-
-	<div id='container'></div>
-	<div id='options'></div>
-	<div id='footer'>
-	  <img id="logo" src="WCCPPDRGlogo.svg"></img>
-	  <div id="author">@StephenHolz</div>
-	  <div id="cite">Source: Census Bureau</div>
-	</div>
-</div>
-
 <style>
-#author, #cite {
-	float:right;
-}
-#logo {
-	height:100%;
-}
+
 .counties {
   fill: none;
   stroke:#000;
@@ -191,10 +173,126 @@ select{
   }
 }
 </style>
+<div id='bigcontainer'>
+<div id='header'>USA Total Population - 2015 Estimates</div>
+
+<div id='container'></div>
+<div id='options'>
+  <!--<div id='microscope'>-->
+  <!--
+    <h3 id='geography'>County, State</h3>
+
+    <table style="width:100%">
+      <tr class="headers">
+        <th class="race">Race/Ethnicity</th>
+        <th class="percent">%</th>
+        <th class="count">Count</th>
+      </tr>
+      <tr class = "asian">
+        <td class = "race">
+          <div class="radio">
+            <label><input type="radio" id='regular' name="optradio">Asian</label>
+          </div>
+        </td>
+        <td id="asianPercent" class="percent">5</td>
+        <td id="asianCount" class="count">500</td>
+      </tr>
+      <tr class = "black">
+        <td class = "race">
+          <div class="radio">
+            <label><input type="radio" id='regular' name="optradio">Black</label>
+          </div>
+        </td>
+        <td id="blackPercent" class="percent">10</td>
+        <td id="blackCount" class="count">1000</td>
+      </tr>
+      <tr class="hispanic">
+        <td class = "race">
+          <div class="radio">
+            <label><input type="radio" id='regular' name="optradio">Hispanic</label>
+          </div>
+        </td>
+        <td id="hispanicPercent" class="percent">25</td>
+        <td id="hispanicCount" class="count">2500</td>
+      </tr>
+      <tr class="other">
+        <td class = "race">
+          <div class="radio">
+            <label><input type="radio" id='regular' name="optradio">Other</label>
+          </div>
+        </td>
+        <td id="otherPercent" class="percent">5</td>
+        <td id="otherCount" class="count">500</td>
+      </tr>
+      <tr class="white">
+        <td class = "race">
+          <div class="radio">
+            <label><input type="radio" id='regular' name="optradio">White</label>
+          </div>
+        </td>
+        <td id="whitePercent" class="percent">55</td>
+        <td id="whiteCount" class="count">5500</td>
+      </tr>
+      <tr class="total selected">
+        <td class = "race">
+          <div class="radio">
+            <label><input type="radio" id='regular' name="optradio">Total</label>
+          </div>
+        </td>
+        <td class="percent">100%</td>
+        <td id="totalCount" class="count">10000</td>
+      </tr>
+    </table>
+
+    <div class="selector" style="width=100%;">
+      <a>Age:
+        <select>
+          <option>All Ages</option>
+          <option>0 to 4</option>
+          <option>5 to 9</option>
+          <option>10 to 14</option>
+          <option>15 to 19</option>
+          <option>20 to 24</option>
+          <option>25 to 29</option>
+          <option>30 to 34</option>
+          <option>35 to 39</option>
+          <option>40 to 44</option>
+          <option>45 to 49</option>
+          <option>50 to 54</option>
+          <option>55 to 59</option>
+          <option>60 to 64</option>
+          <option>65 to 69</option>
+          <option>70 to 74</option>
+          <option>75 to 79</option>
+          <option>80 to 84</option>
+          <option>85+</option>
+        </select>
+      </a>
+    </div>  
+
+    <div class="selector" style="width=100%;">
+      <a>Sex:
+        <select>
+          <option>All</option>
+          <option>Female</option>
+          <option>Male</option>
+        </select>
+      </a>
+    </div>
+-->
+  <!--</div>-->
+</div>
+<div id='footer'>
+  <div id="author">@StephenHolz</div>
+  <div id="cite">Source: Census Bureau</div>
+</div>
+</div>
 <script src="/node_modules/d3/build/d3.min.js"></script>
 <script src="/node_modules/topojson/build/topojson.min.js"></script>
 <script>
-set_geography = 'county'
+
+//set unique map specific parameters here
+set_geography = 'county' //options are county, state, congress, puma
 set_dataset = {
   controlOptions: {
     "Race": { 
@@ -202,37 +300,37 @@ set_dataset = {
         {
           code: "NHAA_ALL",
           label: "Asian",
-          colorgradient: ['#B6AAC3','#9E8DAF','#86719C','#6E5588','#563874','#3E1C60',"#26004D"],
+          colorgradient: ['#FFFFFF','#E6E2EB','#CEC6D7','#B6AAC3','#9E8DAF','#86719C','#6E5588','#563874','#3E1C60',"#26004D"],
           display: false
         },
         {
           code: "NHBA_ALL",
           label: "Black",
-          colorgradient: ['#E2E3AA','#D8DA8D','#CED171','#C5C855','#BBBF38','#B1B61C',"#A8AD00"],
+          colorgradient: ['#FFFFFF','#F5F5E2','#EBECC6','#E2E3AA','#D8DA8D','#CED171','#C5C855','#BBBF38','#B1B61C',"#A8AD00"],
           display: false
         },
         {
           code: "H_ALL",
           label: "Hispanic",
-          colorgradient: ['#AAD1D5','#8DC2C7','#71B2B9','#55A3AB','#38949D','#1C858F','#007681'],
+          colorgradient: ['#FFFFFF','#E2EFF1','#C6E0E3','#AAD1D5','#8DC2C7','#71B2B9','#55A3AB','#38949D','#1C858F','#007681'],
           display: false
         },
         {
           code: "OTHER_ALL",
           label: "Other", 
-          colorgradient: ['#DEB8B8','#D3A0A0','#C98889','#B37171','#B3595A','#A84142',"#9E2A2B"],
+          colorgradient: ['#FFFFFF','#F4E7E7','#E9CFCF','#DEB8B8','#D3A0A0','#C98889','#B37171','#B3595A','#A84142',"#9E2A2B"],
           display: false
         },
         {
           code: "NHWA_ALL",
           label: "White",
-          colorgradient: ['#EFD2AA','#E9C38D','#E4B471','#DFA555','#D9963B','#D4871C',"#CF7800"],
+          colorgradient: ['#FFFFFF','#F9F0E2','#F4E1C6','#EFD2AA','#E9C38D','#E4B471','#DFA555','#D9963B','#D4871C',"#CF7800"],
           display: false
         },
         {
           code: "TOT_POP",
           label: "Total",
-          colorgradient: ['#B5C5D5','#9DB2C7','#849EB9','#6C8BAB','#53789D','#3B658F',"#235281"],
+          colorgradient: ['#FFFFFF','#E6EBF1','#CED8E3','#B5C5D5','#9DB2C7','#849EB9','#6C8BAB','#53789D','#3B658F',"#235281"],
           display: true
         }
       ],
@@ -373,11 +471,20 @@ set_dataset = {
     display:"Table"
   }
 }
+//end unique map specific parameters
+//do not edit below without care
+//See Mike Bostock's incredible D3 examples at bl.ocks.org for further general understanding.
+//Almost all code was informed by one example or another.
+//Which, by the way, thanks to Bostock for developing this library!
+
 
 focusVarCodes = []
 set_dataset.controlOptions[set_dataset.focus].datastuff.forEach(function(thing){
   focusVarCodes.push(thing.code)
 })
+console.log(focusVarCodes)
+
+// Outputs: ["Frodo", "Aslan"]
 
 margin = {top: 0, left: 0, bottom: 0, right: 0}
   , width = parseInt(d3.select('#container').style('width'))
@@ -386,30 +493,70 @@ margin = {top: 0, left: 0, bottom: 0, right: 0}
   , height = width * mapRatio - margin.top - margin.bottom;
 
 
-var svg = d3.select("#container").append('svg')
+var svg = d3.select("#container").append('svg')/*.attr('id','mapsvg')*/
   
 svg.attr("viewBox", "0 0 " + width + " " + height )
   .attr("preserveAspectRatio", "xMinYMin");
 
 g = svg.append('g')
+    //width = +svg.attr("width"),
+    //height = +svg.attr("height");
 
+var rateById = d3.map();
+var nameById = d3.map();
+var hispById = d3.map();
+var asianById = d3.map();
+var blackById = d3.map();
+var otherById = d3.map();
+var whiteById = d3.map();
+
+var allEstimateById = d3.map();
+
+var quantize = d3.scaleQuantize()
+    .domain([0, 200000])
+    .range(d3.range(9).map(function(d,i) { /*return "q" + i + "-9";*/
+      console.log(d)
+      //returnHighestValue(temparray)
+      return set_dataset.controlOptions.Race.datastuff[5].colorgradient[i] 
+    }));
+/*
+var quantize = d3.scaleQuantize()
+  .domain([0, 200000])
+  .range(d3.range(9).map(function(d,i){
+    var displayVars = []
+    set_dataset.controlOptions["Race"].datastuff.forEach(function(variable){
+      if(variable.display){
+        displayVars.push(variable.code)
+      }
+    })
+
+    if(displayVars.length===1){
+      set_dataset.controlOptions["Race"].datastuff.forEach(function(variable,index){
+        if(variable.code===displayVars[0]){
+          return variable    
+        }
+
+      })
+    }
+  }))
+*/
 var projection = d3.geoAlbersUsa()
     .scale(width)
     .translate([width / 2, height / 2]);
 
 var path = d3.geoPath()
     .projection(projection);
-function zoomed() {
 
-  g.attr("transform", d3.event.transform);
-
-}
 if(set_geography==='county'){
   target_json = 'countytopo.json'
 }
-var allEstimateById = d3.map();
-var rateById = d3.map();
-var nameById = d3.map();
+
+function zoomed() {
+  //g.style("stroke-width", 1.5 / d3.event.scale + "px");
+  g.attr("transform", d3.event.transform);
+
+}
+
 
 function returnValueObj(obj) {
   returnList = {}
@@ -423,6 +570,7 @@ function returnValueObj(obj) {
   return returnList
 }
 
+featuredMapVar = 5
 
 function addControls(option){
 
@@ -475,6 +623,8 @@ function addControls(option){
       })
   }
 }
+
+
 d3.select("#options").append("h3").attr("id","geography").text("Geography Title")
 
 for (var prop in set_dataset.controlOptions) {
@@ -484,35 +634,27 @@ for (var prop in set_dataset.controlOptions) {
         
     }
 }
-function returnHighestValue (array){
 
-	var highest = {
-		name: "none",
-		value: 0
-	}
 
-	array.forEach(function(d){
-		if(d.value > highest.value){
-			highest = d
-		}
-	})
 
-	return highest
-}
-colorindex = 0
 
-selected = ["NHWA_ALL","NHBA_ALL","H_ALL","NHAA_ALL","OTHER_ALL"]
-selected = ["NHAA_ALL","NHBA_ALL","H_ALL"]
-//selected = ["TOT_POP"]
+
 d3.queue()
-	.defer(d3.json, target_json)
-    .defer(d3.tsv, (set_dataset.path + set_dataset.file), function(d) {allEstimateById.set(d.ID,returnValueObj(d))})
-	.await(ready)
+    .defer(d3.json, target_json)
+    .defer(d3.tsv, (set_dataset.path + set_dataset.file), function(d) { rateById.set(d.ID, eval('+d.'+set_dataset.controlOptions[set_dataset.focus].datastuff[5].code)); nameById.set(d.ID,d.CTYNAME);/*asianById.set(d.ID,eval('+d.'+set_dataset.controlOptions.Race[0].code));blackById.set(d.ID,eval('+d.'+set_dataset.controlOptions.Race[1].code));hispById.set(d.ID,eval('+d.'+set_dataset.controlOptions.Race[2].code));otherById.set(d.ID,eval('+d.'+set_dataset.controlOptions.Race[3].code));whiteById.set(d.ID,eval('+d.'+set_dataset.controlOptions.Race[4].code));*/allEstimateById.set(d.ID,returnValueObj(d))})
+    .await(ready);
 
 function ready(error, data) {
   if (error) throw error;
 
  var varNames = [ ];
+
+  /*for (var prop in set_dataset.controlOptions) {
+      if (set_dataset.controlOptions.hasOwnProperty(prop)) {
+          varNames.push(prop);
+      }
+  }*/
+
 
   if(set_geography==='county'){
     g.append("g")
@@ -520,87 +662,79 @@ function ready(error, data) {
       .selectAll("path")
         .data(topojson.feature(data, data.objects.counties).features)
       .enter().append("path")
+        //.attr("fill", function(d) { return quantize(rateById.get(d.id)); })
         .attr('id',function(d){return d.id})
         .attr("fill", function(d) {
-          testarray = []
-          bum = allEstimateById.get(d.id)
-if(bum){
-           selected.forEach(function(stuff){
-            
-            var obj = {}
-            obj.name = stuff
-            //console.log(bum[stuff])
-            obj.value = bum[stuff]
-            testarray.push(obj)
-          })
-          boom = returnHighestValue(testarray)
-
-          set_dataset.controlOptions.Race.datastuff.forEach(function(morestuff,i){
-              if(morestuff.code===boom.name){
-                colorindex = i
-              }
-          })
-}
-var quantize = d3.scaleQuantize()
-    .domain([0, 200000])
-    .range(d3.range(6).map(function(d,i) { /*return "q" + i + "-9";*/
-      console.log(d)
-      //returnHighestValue(temparray)
-      return set_dataset.controlOptions.Race.datastuff[colorindex].colorgradient[i] 
-    }));       
-
-                return (quantize(boom.value))
-            //return quantize(rateById.get(d.id)); 
+            return quantize(rateById.get(d.id)); 
         })
-        //.attr("fill","navy")
         .attr("d", path)
         .on('mouseover', function(d, i) {
 
                 var currentState = this;
-                d3.select(this).style('fill', '#f36f20');
+                d3.select(this).transition().duration(200).style('fill', '#f36f20');
 
+               // rateById.get(d3.select(this).attr('id'))
 
-           // d3.select('#geography').text(nameById.get(d3.select(this).attr('id')))   
+            d3.select('#geography').text(nameById.get(d3.select(this).attr('id'))/* + ':\n'+rateById.get(d3.select(this).attr('id'))*/)   
 
-           var newData = allEstimateById.get(d3.select(this).attr('id'));
-
-           testarray = []
-           selected.forEach(function(d){
+            var newData = allEstimateById.get(d3.select(this).attr('id'));
             
-           	var obj = {}
-           	obj.name = d
-           	obj.value = newData[d]
-           	testarray.push(obj)
-           })
-           console.log(testarray)
-		console.log(returnHighestValue(testarray))
-/*            for (var prop in newData) {
+            //d3.select("#NHAA_ALL").select(".value").text(newData.NHAA_ALL)
+            for (var prop in newData) {
                 if (newData.hasOwnProperty(prop)) {
                     //varNames.push(prop);
                     d3.select("#"+prop).select(".value").text(newData[prop])
                     d3.select("#"+prop).select(".percent").text(Math.round(100*newData[prop]/newData.TOT_POP)+"%")
                 }
             }
-  */
-          
+  
+
+/*
+            d3.select('#totalCount').text(rateById.get(d3.select(this).attr('id')))
+            d3.select('#whiteCount').text(whiteById.get(d3.select(this).attr('id')))
+            d3.select('#asianCount').text(asianById.get(d3.select(this).attr('id')))
+            d3.select('#blackCount').text(blackById.get(d3.select(this).attr('id')))
+            d3.select('#otherCount').text(otherById.get(d3.select(this).attr('id')))
+            d3.select('#hispanicCount').text(hispById.get(d3.select(this).attr('id')))
+
+            d3.select('#whitePercent').text((Math.round(100*whiteById.get(d3.select(this).attr('id'))/rateById.get(d3.select(this).attr('id'))))+"%")
+            d3.select('#asianPercent').text((Math.round(100*asianById.get(d3.select(this).attr('id'))/rateById.get(d3.select(this).attr('id'))))+"%")
+            d3.select('#blackPercent').text((Math.round(100*blackById.get(d3.select(this).attr('id'))/rateById.get(d3.select(this).attr('id'))))+"%")
+            d3.select('#otherPercent').text((Math.round(100*otherById.get(d3.select(this).attr('id'))/rateById.get(d3.select(this).attr('id'))))+"%")
+            d3.select('#hispanicPercent').text((Math.round(100*hispById.get(d3.select(this).attr('id'))/rateById.get(d3.select(this).attr('id'))))+"%")
+            /*div .text(function(){return rateById.get(d3.select(this).attr('id'))})  
+                .style("left", (d3.event.pageX -100) + "px")   
+                .style("top", (d3.event.pageY + 60) + "px")
+                .style("font", window.innerWidth/20);  
+
+     */           
 
         })
         .on('mouseout',function(d, i){
 
                 var currentState = this;
-                d3.select(this).style('fill',null).style('stroke',null);
+                d3.select(this).transition().duration(200).style('fill',null).style('stroke',null);
       
         });    
   }
+
+/*
+  g.append('g').attr("class", "states").append("path")
+      .datum(topojson.mesh(data, data.objects.states, function(a, b) { return a !== b; }))   
+      .attr("d", path);
+*/
 
 g.append("g")
         .attr("class", "states")
       .selectAll("path")
         .data(topojson.feature(data, data.objects.states).features)
       .enter().append("path")
-
+        //.attr("class", function(d) { return quantize(rateById.get(eval('d.'+set_dataset.idvar))); })
+        //.attr('id',function(d){return eval('d.'+set_dataset.idvar)})
         .attr("d", path)
   zoom = d3.zoom()
+    //.translateBy(0, 0)
+    //.scaleBy(1)
     .scaleExtent([.5, 50])
     .on("zoom", zoomed);
 
