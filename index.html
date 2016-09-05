@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1.0, user-scalable=no">
 
@@ -193,6 +192,7 @@ select{
 </style>
 <script src="/node_modules/d3/build/d3.min.js"></script>
 <script src="/node_modules/topojson/build/topojson.min.js"></script>
+
 <script>
 set_geography = 'county'
 set_dataset = {
@@ -374,116 +374,147 @@ set_dataset = {
   }
 }
 
-focusVarCodes = []
-set_dataset.controlOptions[set_dataset.focus].datastuff.forEach(function(thing){
-  focusVarCodes.push(thing.code)
-})
+var calcMap = function(){
+	margin = {top: 0, left: 0, bottom: 0, right: 0}
+	  , width = parseInt(d3.select('#container').style('width'))
+	  , width = width - margin.left - margin.right
+	  , mapRatio = .5
+	  , height = width * mapRatio - margin.top - margin.bottom;
 
-margin = {top: 0, left: 0, bottom: 0, right: 0}
-  , width = parseInt(d3.select('#container').style('width'))
-  , width = width - margin.left - margin.right
-  , mapRatio = .5
-  , height = width * mapRatio - margin.top - margin.bottom;
+	projection = d3.geoAlbersUsa()
+      .scale(width)
+      .translate([width / 2, height / 2]);
+
+	path = d3.geoPath()
+      .projection(projection);
+
+    target_json = "countytopo.json"
 
 
-var svg = d3.select("#container").append('svg')
-  
-svg.attr("viewBox", "0 0 " + width + " " + height )
-  .attr("preserveAspectRatio", "xMinYMin");
 
-g = svg.append('g')
 
-var projection = d3.geoAlbersUsa()
-    .scale(width)
-    .translate([width / 2, height / 2]);
-
-var path = d3.geoPath()
-    .projection(projection);
-function zoomed() {
-
-  g.attr("transform", d3.event.transform);
-
-}
-if(set_geography==='county'){
-  target_json = 'countytopo.json'
-}
-var allEstimateById = d3.map();
-var rateById = d3.map();
-var nameById = d3.map();
-
-function returnValueObj(obj) {
-  returnList = {}
-
-  //returnList["TOT_POP"] = d["TOT_POP"]
-  returnList[set_dataset.idvar] = obj[set_dataset.idvar]
-  returnList[set_dataset.geovar] = obj[set_dataset.geovar]
-  set_dataset.controlOptions[set_dataset.focus].datastuff.forEach(function(thing){
-    returnList[thing.code] = +obj[thing.code]
-  })
-  return returnList
 }
 
+var updateMap = function(){
 
-function addControls(option){
+	svg
+	  .attr("viewBox", "0 0 " + width + " " + height )
+	  .attr("preserveAspectRatio", "xMinYMin");
 
-  if(set_dataset.controlOptions[option].interface.type==='table'){
-
-    d3.select("#options")
-      .append("table")
-      .attr("id",option+"table")
-
-    var tableheaders = d3.select("#"+option+"table")
-      .append("tr")
-
-    tableheaders.append('th').text('Map')
-    set_dataset.controlOptions[option].interface.columns.forEach(function(d){
-        tableheaders.append("th").text(d.label)
-    })
-
-    set_dataset.controlOptions[option].datastuff.forEach(function(d){
-      
-
-      var row = d3.select("#"+option+"table")
-        .append("tr")
-        .attr('id',d.code)
-        .style('width','100%')
-        .style("background-color",d.colorgradient[d.colorgradient.length-1])
-      
-
-      row.append('th').style('width','10%').append("input").attr('code',d.code).attr("type","checkbox")
-
-
-
-      set_dataset.controlOptions[option].interface.columns.forEach(function(col){
-          if(col.type==="self"){
-            row.append("th").attr('class',col.type).text(d.label).style('width','30%').style('text-align','left')
-          }else if(col.type==="value"){
-            row.append("th").attr('class',col.type).text(d.label).style('width','40%').style('text-align','right')
-          }else{
-            row.append("th").attr('class',col.type).style('text-align','center').style('width','20%')
-          }
-      })
-
-    })
-  }else if(set_dataset.controlOptions[option].interface.type==='select'){
-    var selector = d3.select('#options')
-      .append('div')
-      .append('select')
-    
-    set_dataset.controlOptions[option].datastuff.forEach(function(d){
-          selector.append("option").attr('code',d.code).text(d.label)
-      })
-  }
 }
-d3.select("#options").append("h3").attr("id","geography").text("Geography Title")
 
-for (var prop in set_dataset.controlOptions) {
-    if (set_dataset.controlOptions.hasOwnProperty(prop)) {
-        //varNames.push(prop);
-        addControls(prop)
-        
-    }
+var loadData = function(){
+	allEstimateById = d3.map()
+
+	function returnValueObj(obj) {
+	  returnList = {}
+
+	  //returnList["TOT_POP"] = d["TOT_POP"]
+	  returnList[set_dataset.idvar] = obj[set_dataset.idvar]
+	  returnList[set_dataset.geovar] = obj[set_dataset.geovar]
+	  set_dataset.controlOptions[set_dataset.focus].datastuff.forEach(function(thing){
+	    returnList[thing.code] = +obj[thing.code]
+	  })
+	  return returnList
+	}	
+
+	d3.queue()
+	  .defer(d3.tsv, (set_dataset.path + set_dataset.file), function(d) {allEstimateById.set(d.ID,returnValueObj(d))})
+		.await(function(error, data){
+			updateCountyFill()
+			d3.selectAll('input').on("change",function(){
+			  var currentCode = d3.select(this).attr("code")
+			  //When Total is Selected
+			  if(d3.select(this).attr("code")==="TOT_POP"){
+			    d3.selectAll('input').property('checked',false)
+			    d3.select(this).property('checked',true)
+
+			    set_dataset.controlOptions["Race"].datastuff.forEach(function(d){
+			      d.display = false
+			      if(d.code==="TOT_POP"){
+			        d.display = true
+			      }
+
+			    })
+
+
+			  }else{
+			    d3.select('#TOT_POP').selectAll('th').selectAll('input').property('checked',false)
+			    
+			    set_dataset.controlOptions["Race"].datastuff.forEach(function(d){
+			      if(d.code==="TOT_POP"){
+			        d.display = false
+			      }else if(d.code===currentCode){
+			        d.display = !d.display
+			      }
+
+			    })
+			  }
+
+			  selectedOptions = []
+
+			  set_dataset.controlOptions["Race"].datastuff.forEach(function(d){
+			  	if(d.display){
+			  		selectedOptions.push(d.code)
+			  	}
+			  })
+
+			  updateCountyFill()
+			})
+		})
 }
+var drawMap = function(){
+
+	calcMap();
+
+	svg = d3.select("#container").append('svg')
+
+	g = svg.append('g')
+
+	updateMap();
+
+	d3.queue()
+		.defer(d3.json, target_json)
+		.await(function(error, data){
+			counties = g.append("g")
+				.attr("class","counties")
+			  .selectAll("path")
+			  	.data(topojson.feature(data, data.objects.counties).features)
+			  .enter().append("path")
+			  	.attr("id",function(d){return d.id})
+			  	.attr("d", path)
+
+
+
+			states = g.append("g")
+				.attr("class","states")
+			  .selectAll("path")
+			  	.data(topojson.feature(data, data.objects.states).features)
+			  .enter().append("path")
+			    .attr("d", path)
+
+		    zoomed = function(){
+		    	g.attr("transform", d3.event.transform);
+		    }
+
+			zoom = d3.zoom()
+				.scaleExtent([.5, 50])
+				.on("zoom", zoomed);
+
+			svg
+				.call(zoom)
+				.call(zoom.transform, d3.zoomIdentity);
+
+			loadData()
+		})
+
+
+}
+
+var calcCountyFill = function(){
+
+}
+
 function returnHighestValue (array){
 
 	var highest = {
@@ -499,151 +530,144 @@ function returnHighestValue (array){
 
 	return highest
 }
-colorindex = 0
+selectedOptions = ["NHAA_ALL","NHBA_ALL","H_ALL"]
+selectedOptions = ["TOT_POP"]
+var updateCountyFill = function(){
+	counties.attr("fill",function(d){
 
-selected = ["NHWA_ALL","NHBA_ALL","H_ALL","NHAA_ALL","OTHER_ALL"]
-selected = ["NHAA_ALL","NHBA_ALL","H_ALL"]
-//selected = ["TOT_POP"]
-d3.queue()
-	.defer(d3.json, target_json)
-    .defer(d3.tsv, (set_dataset.path + set_dataset.file), function(d) {allEstimateById.set(d.ID,returnValueObj(d))})
-	.await(ready)
+		selectArray = []
 
-function ready(error, data) {
-  if (error) throw error;
+		countyValues = allEstimateById.get(d.id)
 
- var varNames = [ ];
+		if(countyValues){
 
-  if(set_geography==='county'){
-    g.append("g")
-        .attr("class", "counties")
-      .selectAll("path")
-        .data(topojson.feature(data, data.objects.counties).features)
-      .enter().append("path")
-        .attr('id',function(d){return d.id})
-        .attr("fill", function(d) {
-          testarray = []
-          bum = allEstimateById.get(d.id)
-if(bum){
-           selected.forEach(function(stuff){
-            
-            var obj = {}
-            obj.name = stuff
-            //console.log(bum[stuff])
-            obj.value = bum[stuff]
-            testarray.push(obj)
-          })
-          boom = returnHighestValue(testarray)
+			selectedOptions.forEach(function(stuff){
 
-          set_dataset.controlOptions.Race.datastuff.forEach(function(morestuff,i){
-              if(morestuff.code===boom.name){
-                colorindex = i
-              }
-          })
-}
-var quantize = d3.scaleQuantize()
-    .domain([0, 200000])
-    .range(d3.range(6).map(function(d,i) { /*return "q" + i + "-9";*/
-      console.log(d)
-      //returnHighestValue(temparray)
-      return set_dataset.controlOptions.Race.datastuff[colorindex].colorgradient[i] 
-    }));       
+				var obj = {}
 
-                return (quantize(boom.value))
-            //return quantize(rateById.get(d.id)); 
-        })
-        //.attr("fill","navy")
-        .attr("d", path)
-        .on('mouseover', function(d, i) {
+				obj.name = stuff
 
-                var currentState = this;
-                d3.select(this).style('fill', '#f36f20');
+				obj.value = countyValues[stuff]
 
+				selectArray.push(obj)
+			})
 
-           // d3.select('#geography').text(nameById.get(d3.select(this).attr('id')))   
+			highestValue = returnHighestValue(selectArray)
 
-           var newData = allEstimateById.get(d3.select(this).attr('id'));
+			set_dataset.controlOptions.Race.datastuff.forEach(function(morestuff,i){
+			  if(morestuff.code===highestValue.name){
+			    colorindex = i
+			  }
+			})
 
-           testarray = []
-           selected.forEach(function(d){
-            
-           	var obj = {}
-           	obj.name = d
-           	obj.value = newData[d]
-           	testarray.push(obj)
-           })
-           console.log(testarray)
-		console.log(returnHighestValue(testarray))
-/*            for (var prop in newData) {
-                if (newData.hasOwnProperty(prop)) {
-                    //varNames.push(prop);
-                    d3.select("#"+prop).select(".value").text(newData[prop])
-                    d3.select("#"+prop).select(".percent").text(Math.round(100*newData[prop]/newData.TOT_POP)+"%")
-                }
+		}
+
+		var quantize = d3.scaleQuantize()
+		    .domain([0, 200000])
+		    .range(d3.range(6).map(function(d,i) {
+		      return set_dataset.controlOptions.Race.datastuff[colorindex].colorgradient[i] 
+		    }));
+
+		 return(quantize(highestValue.value))
+	})
+
+	counties.on("mouseover",function(d,i){
+		var currentState = this;
+		d3.select(this).style("fill","pink")
+
+		var newData = allEstimateById.get(d3.select(this).attr('id'));
+		format = d3.format(',');
+
+		for (var prop in newData) {
+
+            if (newData.hasOwnProperty(prop)) {
+               
+                d3.select("#"+prop).select(".value").text(format(newData[prop]))
+                d3.select("#"+prop).select(".percent").text(Math.round(100*newData[prop]/newData.TOT_POP)+"%")
             }
-  */
-          
+        }
 
-        })
-        .on('mouseout',function(d, i){
+        d3.select("#geography").text(allEstimateById.get(d.id).CTYNAME)
+	})
 
-                var currentState = this;
-                d3.select(this).style('fill',null).style('stroke',null);
-      
-        });    
-  }
-
-g.append("g")
-        .attr("class", "states")
-      .selectAll("path")
-        .data(topojson.feature(data, data.objects.states).features)
-      .enter().append("path")
-
-        .attr("d", path)
-  zoom = d3.zoom()
-    .scaleExtent([.5, 50])
-    .on("zoom", zoomed);
-
-  svg
-    .call(zoom) // delete this line to disable free zooming
-    .call(zoom.transform, d3.zoomIdentity);
-
-
-//Table Controls
-
-d3.selectAll('input').property("checked",false)
-d3.select('#TOT_POP').selectAll('th').selectAll('input').property('checked',true)
-d3.selectAll('input').on("change",function(){
-  var currentCode = d3.select(this).attr("code")
-  //When Total is Selected
-  if(d3.select(this).attr("code")==="TOT_POP"){
-    d3.selectAll('input').property('checked',false)
-    d3.select(this).property('checked',true)
-
-    set_dataset.controlOptions["Race"].datastuff.forEach(function(d){
-      d.display = false
-      if(d.code==="TOT_POP"){
-        d.display = true
-      }
-
-    })
-
-
-  }else{
-    d3.select('#TOT_POP').selectAll('th').selectAll('input').property('checked',false)
-    console.log(currentCode)
-    set_dataset.controlOptions["Race"].datastuff.forEach(function(d){
-      if(d.code==="TOT_POP"){
-        d.display = false
-      }else if(d.code===currentCode){
-        d.display = !d.display
-      }
-
-    })
-  }
-
-
-})
+	counties.on("mouseout",function(d,i){
+        d3.select(this).style('fill',null).style('stroke',null);		
+	})
 }
+var drawControls = function(){
+	function addControls(option){
+
+	  	if(set_dataset.controlOptions[option].interface.type==='table'){
+
+		    d3.select("#options")
+		      .append("table")
+		      .attr("id",option+"table")
+
+	    	var tableheaders = d3.select("#"+option+"table")
+	      		.append("tr")
+
+	    	tableheaders.append('th').text('Map')
+
+		    set_dataset.controlOptions[option].interface.columns.forEach(function(d){
+		        tableheaders.append("th").text(d.label)
+		    })
+
+	    	set_dataset.controlOptions[option].datastuff.forEach(function(d){
+	      
+
+				var row = d3.select("#"+option+"table")
+					.append("tr")
+					.attr('id',d.code)
+					.style('width','100%')
+					.style("background-color",d.colorgradient[d.colorgradient.length-1])
+
+
+	      		row.append('th').style('width','10%').append("input").attr('code',d.code).attr("type","checkbox")
+
+
+
+	      		set_dataset.controlOptions[option].interface.columns.forEach(function(col){
+
+					if(col.type==="self"){
+					row.append("th").attr('class',col.type).text(d.label).style('width','30%').style('text-align','left')
+					}else if(col.type==="value"){
+					row.append("th").attr('class',col.type).text(d.label).style('width','40%').style('text-align','right')
+					}else{
+					row.append("th").attr('class',col.type).style('text-align','center').style('width','20%')
+					}
+
+	      		})
+
+	    	})
+
+	  	}else if(set_dataset.controlOptions[option].interface.type==='select'){
+	    	
+	    	var selector = d3.select('#options')
+				.append('div')
+				.append('select')
+	    
+			set_dataset.controlOptions[option].datastuff.forEach(function(d){
+			      selector.append("option").attr('code',d.code).text(d.label)
+			})
+	  	}
+	}
+
+	d3.select("#options").append("h3").attr("id","geography").text("Geography Title")
+
+	for (var prop in set_dataset.controlOptions) {
+	    if (set_dataset.controlOptions.hasOwnProperty(prop)) {
+	        //varNames.push(prop);
+	        addControls(prop)
+	        
+	    }
+	}
+
+	d3.selectAll('input').property("checked",false)
+
+	d3.select('#TOT_POP').selectAll('th').selectAll('input').property('checked',true)
+
+}
+drawControls()
+drawMap()
 
 </script>

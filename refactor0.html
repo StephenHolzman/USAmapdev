@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+<div id='bigcontainer'>
+	<div id='header'>USA Total Population - 2015 Estimates</div>
+
+	<div id='container'></div>
+	<div id='options'></div>
+	<div id='footer'>
+	  <img id="logo" src="WCCPPDRGlogo.svg"></img>
+	  <div id="author">@StephenHolz</div>
+	  <div id="cite">Source: Census Bureau</div>
+	</div>
+</div>
+
+<style>
+#author, #cite {
+	float:right;
+}
+#logo {
+	height:100%;
+}
+.counties {
+  fill: none;
+  stroke:#000;
+  stroke-width:.1;
+}
+
+
+.states {
+  fill: none;
+  stroke: #000;
+  stroke-width:.5;
+  stroke-linejoin: round;
+}
+
+.q0-9 { fill:rgb(247,251,255); }
+.q1-9 { fill:rgb(222,235,247); }
+.q2-9 { fill:rgb(198,219,239); }
+.q3-9 { fill:rgb(158,202,225); }
+.q4-9 { fill:rgb(107,174,214); }
+.q5-9 { fill:rgb(66,146,198); }
+.q6-9 { fill:rgb(33,113,181); }
+.q7-9 { fill:rgb(8,81,156); }
+.q8-9 { fill:rgb(8,48,107); }
+
+#footer {
+  height: 40px;
+  flex: 1 100%;
+  background-color: #203467;
+  color:white;
+  padding:4px;
+  /*position: fixed;
+  bottom: 0;
+  left: 0;*/
+}
+#header {
+  flex: 1 100%;
+  background-color: #203467;
+  margin:0px;
+  /*position: fixed;
+  top: 0px;
+  left: 0px;*/
+  color:white;
+  padding:8px;
+  font-size: 20px;
+  font-family:Adobe Caslon Pro;
+}
+#options {
+  background:#e0e0d1;
+  max-width:70%;
+  min-height:380px;
+  flex: 1 0px;
+  text-align:center;
+  color:#235281;
+  padding-left:15%;
+  padding-right:15%;
+}
+h1,h2,a{
+  color:#203467;
+}
+th, td{
+  border-bottom: 1px solid #000;
+  border-spacing:0px;
+  padding:5px;
+  margin:0px;
+
+
+}
+table{
+  border-spacing:0;
+  font-family: Garamond;
+  color:white;
+  width:100%;
+}
+.selector{
+  text-align:left;
+  height:20px;
+  padding:3px;
+}
+select{
+  float:right;
+  width:85%;
+  padding:0;
+  margin:0;
+}
+
+.tooltip { 
+    position: absolute;     
+    text-align: center;      
+    padding: 0px;       
+    background: #f36f20; 
+    font: 12px sans-serif;    
+    border: 0px;    
+    border-radius: 8px;   
+    pointer-events: none;    
+
+}
+#container {
+  /*position:fixed;
+  top:60px;
+  bottom:80px;
+  left:0px;*/
+  flex: 1 100%;
+  max-height:500px;
+  background-color: #f1eede;
+  overflow:hidden;
+
+}
+.count {
+  text-align:right;
+  width:35%;
+  color:white;
+}
+.race {
+  text-align:left;
+  color:white;
+}
+.percent {
+  color:white;
+}
+.total {
+  background-color:#235281;
+}
+.white {
+  background-color:#CF7800;
+}
+.other {
+  background-color:#9e2a2b;
+}
+.hispanic {
+  background-color:#007681;
+}
+
+.black {
+  background-color:#a8ad00;
+}
+.asian {
+  background-color: #26004d;
+}
+.headers th{
+  color:navy;
+}
+.selected {
+  opacity:1;
+}
+#bigcontainer {
+  display: flex;
+  flex-flow: row wrap;
+  max-height:750px;
+}
+/*@media all and (min-width: 600px) {
+  /* We tell both sidebars to share a row */
+ /* #options { flex: 1 0px; }
+}*/
+
+/* Large screens */
+@media all and (min-width: 950px) {
+  /* We invert order of first sidebar and main
+   * And tell the main element to take twice as much width as the other two sidebars 
+   */
+  #container { flex: 2 0px; }
+  #options { order: 2; max-width: 270px;  padding-left:0%;
+  padding-right:0%;} 
+  #container { order: 1; }
+  #footer  { order: 3; }
+  #header {
+    font-size:40px;
+  }
+}
+</style>
+<script src="/node_modules/d3/build/d3.min.js"></script>
+<script src="/node_modules/topojson/build/topojson.min.js"></script>
+<script>
+set_geography = 'county'
+set_dataset = {
+  controlOptions: {
+    "Race": { 
+      datastuff:[
+        {
+          code: "NHAA_ALL",
+          label: "Asian",
+          colorgradient: ['#B6AAC3','#9E8DAF','#86719C','#6E5588','#563874','#3E1C60',"#26004D"],
+          display: false
+        },
+        {
+          code: "NHBA_ALL",
+          label: "Black",
+          colorgradient: ['#E2E3AA','#D8DA8D','#CED171','#C5C855','#BBBF38','#B1B61C',"#A8AD00"],
+          display: false
+        },
+        {
+          code: "H_ALL",
+          label: "Hispanic",
+          colorgradient: ['#AAD1D5','#8DC2C7','#71B2B9','#55A3AB','#38949D','#1C858F','#007681'],
+          display: false
+        },
+        {
+          code: "OTHER_ALL",
+          label: "Other", 
+          colorgradient: ['#DEB8B8','#D3A0A0','#C98889','#B37171','#B3595A','#A84142',"#9E2A2B"],
+          display: false
+        },
+        {
+          code: "NHWA_ALL",
+          label: "White",
+          colorgradient: ['#EFD2AA','#E9C38D','#E4B471','#DFA555','#D9963B','#D4871C',"#CF7800"],
+          display: false
+        },
+        {
+          code: "TOT_POP",
+          label: "Total",
+          colorgradient: ['#B5C5D5','#9DB2C7','#849EB9','#6C8BAB','#53789D','#3B658F',"#235281"],
+          display: true
+        }
+      ],
+      interface: {
+        type: "table",
+        columns: [
+          {
+            label: "Race/Ethnicity",
+            type: "self"
+          },
+          {
+            label: "%",
+            type: "percent",
+            denominatorcode: "TOT_POP"
+          },
+          {
+            label: "Count",
+            type: "value"
+          }
+        ]
+      }
+    },
+    "Age": {
+      datastuff: [
+      {
+        code: 0,
+        label: "All Ages"
+      },
+      {
+        code: 1,
+        label: "0 to 4"
+      },
+      {
+        code: 2,
+        label: "5 to 9"
+      },
+      {
+        code: 3,
+        label: "10 to 14"
+      },
+      {
+        code: 4,
+        label: "15 to 19"
+      },
+      {
+        code: 5,
+        label: "20 to 24"
+      },
+      {
+        code: 6,
+        label: "25 to 29"
+      },
+      {
+        code: 7,
+        label: "30 to 34"
+      },
+      {
+        code: 8,
+        label: "35 to 39"
+      },
+      {
+        code: 9,
+        label: "40 to 44"
+      },
+      {
+        code: 10,
+        label: "45 to 49"
+      },
+      {
+        code: 11,
+        label: "50 to 54"
+      },
+      {
+        code: 12,
+        label: "55 to 59"
+      },
+      {
+        code: 13,
+        label: "60 to 64"
+      },
+      {
+        code: 14,
+        label: "65 to 69"
+      },
+      {
+        code: 15,
+        label: "70 to 74"
+      },
+      {
+        code: 16,
+        label: "75 to 79"
+      },
+      {
+        code: 17,
+        label: "80 to 84"
+      },
+      {
+        code: 18,
+        label: "85+"
+      },
+      {
+        code: 19,
+        label: ""
+      }
+    ],
+      interface: {
+        type: "select",
+      }
+  },
+    "Sex": {
+      datastuff: [
+      {
+        code: 0,
+        label: "All Sexes"
+      },
+      {
+        code: 1,
+        label: "Female"
+      },
+      {
+        code: 2,
+        label: "Male"
+      }
+    ],
+      interface: {
+        type: "select",
+      }
+  }
+  },
+  path: 'data/',
+  idvar: 'ID',
+  focus: "Race", //Set to one of control options
+  geovar: 'CTYNAME', 
+  focusSelect: "TOT", //Set to focus option code
+  file: "Age0Sex0.tsv",//take any control options not in focus in order in format "OPTIONCODE", should be a tsv
+  tooltip: {
+    title: "CTYNAME",
+    display:"Table"
+  }
+}
+
+focusVarCodes = []
+set_dataset.controlOptions[set_dataset.focus].datastuff.forEach(function(thing){
+  focusVarCodes.push(thing.code)
+})
+
+margin = {top: 0, left: 0, bottom: 0, right: 0}
+  , width = parseInt(d3.select('#container').style('width'))
+  , width = width - margin.left - margin.right
+  , mapRatio = .5
+  , height = width * mapRatio - margin.top - margin.bottom;
+
+
+var svg = d3.select("#container").append('svg')
+  
+svg.attr("viewBox", "0 0 " + width + " " + height )
+  .attr("preserveAspectRatio", "xMinYMin");
+
+g = svg.append('g')
+
+var projection = d3.geoAlbersUsa()
+    .scale(width)
+    .translate([width / 2, height / 2]);
+
+var path = d3.geoPath()
+    .projection(projection);
+function zoomed() {
+
+  g.attr("transform", d3.event.transform);
+
+}
+if(set_geography==='county'){
+  target_json = 'countytopo.json'
+}
+var allEstimateById = d3.map();
+var rateById = d3.map();
+var nameById = d3.map();
+
+function returnValueObj(obj) {
+  returnList = {}
+
+  //returnList["TOT_POP"] = d["TOT_POP"]
+  returnList[set_dataset.idvar] = obj[set_dataset.idvar]
+  returnList[set_dataset.geovar] = obj[set_dataset.geovar]
+  set_dataset.controlOptions[set_dataset.focus].datastuff.forEach(function(thing){
+    returnList[thing.code] = +obj[thing.code]
+  })
+  return returnList
+}
+
+
+function addControls(option){
+
+  if(set_dataset.controlOptions[option].interface.type==='table'){
+
+    d3.select("#options")
+      .append("table")
+      .attr("id",option+"table")
+
+    var tableheaders = d3.select("#"+option+"table")
+      .append("tr")
+
+    tableheaders.append('th').text('Map')
+    set_dataset.controlOptions[option].interface.columns.forEach(function(d){
+        tableheaders.append("th").text(d.label)
+    })
+
+    set_dataset.controlOptions[option].datastuff.forEach(function(d){
+      
+
+      var row = d3.select("#"+option+"table")
+        .append("tr")
+        .attr('id',d.code)
+        .style('width','100%')
+        .style("background-color",d.colorgradient[d.colorgradient.length-1])
+      
+
+      row.append('th').style('width','10%').append("input").attr('code',d.code).attr("type","checkbox")
+
+
+
+      set_dataset.controlOptions[option].interface.columns.forEach(function(col){
+          if(col.type==="self"){
+            row.append("th").attr('class',col.type).text(d.label).style('width','30%').style('text-align','left')
+          }else if(col.type==="value"){
+            row.append("th").attr('class',col.type).text(d.label).style('width','40%').style('text-align','right')
+          }else{
+            row.append("th").attr('class',col.type).style('text-align','center').style('width','20%')
+          }
+      })
+
+    })
+  }else if(set_dataset.controlOptions[option].interface.type==='select'){
+    var selector = d3.select('#options')
+      .append('div')
+      .append('select')
+    
+    set_dataset.controlOptions[option].datastuff.forEach(function(d){
+          selector.append("option").attr('code',d.code).text(d.label)
+      })
+  }
+}
+d3.select("#options").append("h3").attr("id","geography").text("Geography Title")
+
+for (var prop in set_dataset.controlOptions) {
+    if (set_dataset.controlOptions.hasOwnProperty(prop)) {
+        //varNames.push(prop);
+        addControls(prop)
+        
+    }
+}
+function returnHighestValue (array){
+
+	var highest = {
+		name: "none",
+		value: 0
+	}
+
+	array.forEach(function(d){
+		if(d.value > highest.value){
+			highest = d
+		}
+	})
+
+	return highest
+}
+colorindex = 0
+
+selectedOptions = ["NHWA_ALL","NHBA_ALL","H_ALL","NHAA_ALL","OTHER_ALL"]
+selectedOptions = ["NHAA_ALL","NHBA_ALL","H_ALL"]
+//selected = ["TOT_POP"]
+d3.queue()
+	.defer(d3.json, target_json)
+    .defer(d3.tsv, (set_dataset.path + set_dataset.file), function(d) {allEstimateById.set(d.ID,returnValueObj(d))})
+	.await(ready)
+
+function ready(error, data) {
+  if (error) throw error;
+
+ var varNames = [ ];
+
+  if(set_geography==='county'){
+    g.append("g")
+        .attr("class", "counties")
+      .selectAll("path")
+        .data(topojson.feature(data, data.objects.counties).features)
+      .enter().append("path")
+        .attr('id',function(d){return d.id})
+        .attr("fill", function(d) {
+          testarray = []
+          bum = allEstimateById.get(d.id)
+if(bum){
+           selected.forEach(function(stuff){
+            
+            var obj = {}
+            obj.name = stuff
+            //console.log(bum[stuff])
+            obj.value = bum[stuff]
+            testarray.push(obj)
+          })
+          boom = returnHighestValue(testarray)
+
+          set_dataset.controlOptions.Race.datastuff.forEach(function(morestuff,i){
+              if(morestuff.code===boom.name){
+                colorindex = i
+              }
+          })
+}
+var quantize = d3.scaleQuantize()
+    .domain([0, 200000])
+    .range(d3.range(6).map(function(d,i) { /*return "q" + i + "-9";*/
+      console.log(d)
+      //returnHighestValue(temparray)
+      return set_dataset.controlOptions.Race.datastuff[colorindex].colorgradient[i] 
+    }));       
+
+                return (quantize(boom.value))
+            //return quantize(rateById.get(d.id)); 
+        })
+        //.attr("fill","navy")
+        .attr("d", path)
+        .on('mouseover', function(d, i) {
+
+                var currentState = this;
+                d3.select(this).style('fill', '#f36f20');
+
+
+           // d3.select('#geography').text(nameById.get(d3.select(this).attr('id')))   
+
+           var newData = allEstimateById.get(d3.select(this).attr('id'));
+
+           testarray = []
+           selected.forEach(function(d){
+            
+           	var obj = {}
+           	obj.name = d
+           	obj.value = newData[d]
+           	testarray.push(obj)
+           })
+           console.log(testarray)
+		console.log(returnHighestValue(testarray))
+/*            for (var prop in newData) {
+                if (newData.hasOwnProperty(prop)) {
+                    //varNames.push(prop);
+                    d3.select("#"+prop).select(".value").text(newData[prop])
+                    d3.select("#"+prop).select(".percent").text(Math.round(100*newData[prop]/newData.TOT_POP)+"%")
+                }
+            }
+  */
+          
+
+        })
+        .on('mouseout',function(d, i){
+
+                var currentState = this;
+                d3.select(this).style('fill',null).style('stroke',null);
+      
+        });    
+  }
+
+g.append("g")
+        .attr("class", "states")
+      .selectAll("path")
+        .data(topojson.feature(data, data.objects.states).features)
+      .enter().append("path")
+
+        .attr("d", path)
+  zoom = d3.zoom()
+    .scaleExtent([.5, 50])
+    .on("zoom", zoomed);
+
+  svg
+    .call(zoom) // delete this line to disable free zooming
+    .call(zoom.transform, d3.zoomIdentity);
+
+
+//Table Controls
+
+d3.selectAll('input').property("checked",false)
+d3.select('#TOT_POP').selectAll('th').selectAll('input').property('checked',true)
+d3.selectAll('input').on("change",function(){
+  var currentCode = d3.select(this).attr("code")
+  //When Total is Selected
+  if(d3.select(this).attr("code")==="TOT_POP"){
+    d3.selectAll('input').property('checked',false)
+    d3.select(this).property('checked',true)
+
+    set_dataset.controlOptions["Race"].datastuff.forEach(function(d){
+      d.display = false
+      if(d.code==="TOT_POP"){
+        d.display = true
+      }
+
+    })
+
+
+  }else{
+    d3.select('#TOT_POP').selectAll('th').selectAll('input').property('checked',false)
+    console.log(currentCode)
+    set_dataset.controlOptions["Race"].datastuff.forEach(function(d){
+      if(d.code==="TOT_POP"){
+        d.display = false
+      }else if(d.code===currentCode){
+        d.display = !d.display
+      }
+
+    })
+  }
+
+
+})
+}
+
+</script>
