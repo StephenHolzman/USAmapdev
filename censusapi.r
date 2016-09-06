@@ -31,11 +31,36 @@ for(a in 0:18){
   selectvar_ALL <- select(clay, ID,CTYNAME,TOT_POP,NHWA_ALL, NHBA_ALL, NHAA_ALL, H_ALL, OTHER_ALL)
   selectvar_MALE <- select(clay, ID,CTYNAME,TOT_MALE,NHWA_MALE, NHBA_MALE, NHAA_MALE, H_MALE, OTHER_MALE)
   selectvar_FEMALE <- select(clay, ID,CTYNAME,TOT_FEMALE,NHWA_FEMALE, NHBA_FEMALE, NHAA_FEMALE, H_FEMALE, OTHER_FEMALE)
-  selectvar_ALL <- select(clay,ID,TOT_POP,CTYNAME)
+  
+  #selectvar_ALL <- select(clay,ID,TOT_POP,CTYNAME)
+  selectvar_MALE <- select(
+    clay,ID,
+    TOT_POP = TOT_MALE,
+    NHWA_ALL = NHWA_MALE,
+    NHBA_ALL=NHBA_MALE,
+    NHAA_ALL=NHAA_MALE,
+    OTHER_ALL=OTHER_MALE,
+    H_ALL=H_MALE,
+    CTYNAME)
+  
+  selectvar_FEMALE <- select(
+    clay,ID,
+    TOT_POP = TOT_FEMALE,
+    NHWA_ALL = NHWA_FEMALE,
+    NHBA_ALL=NHBA_FEMALE,
+    NHAA_ALL=NHAA_FEMALE,
+    OTHER_ALL=OTHER_FEMALE,
+    H_ALL=H_FEMALE,
+    CTYNAME)
   
   write.table(selectvar_ALL,file=paste0("data/Age",a,"Sex0.tsv"),sep='\t',row.names=FALSE,quote=FALSE)
-  
+  write.table(selectvar_MALE,file=paste0("data/Age",a,"Sex2.tsv"),sep='\t',row.names=FALSE,quote=FALSE)
+  write.table(selectvar_FEMALE,file=paste0("data/Age",a,"Sex1.tsv"),sep='\t',row.names=FALSE,quote=FALSE)
 }
+
+
+
+
 #Create other variables
 #All races
 #both sexes
