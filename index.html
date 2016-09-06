@@ -3,13 +3,13 @@
 <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1.0, user-scalable=no">
 
 <div id='bigcontainer'>
-	<div id='header'>USA Total Population - 2015 Estimates</div>
+	<div id='header'>USA County Populations - 2015 Estimates</div>
 
 	<div id='container'></div>
 	<div id='options'></div>
 	<div id='footer'>
 	  <img id="logo" src="WCCPPDRGlogo.svg"></img>
-	  <div id="author">@StephenHolz</div>
+	  <!--div id="author">@StephenHolz</div-->
 	  <div id="cite">Source: Census Bureau</div>
 	</div>
 </div>
@@ -421,7 +421,26 @@ var loadData = function(){
 	d3.queue()
 	  .defer(d3.tsv, (set_dataset.path + set_dataset.file), function(d) {allEstimateById.set(d.ID,returnValueObj(d))})
 		.await(function(error, data){
+
 			updateCountyFill()
+
+
+      d3.selectAll('select').on("change",function(){
+          
+        newDataString = ""
+
+        for(var i  = 0; i < d3.selectAll('select')._groups[0].length; i++){
+          newDataString = newDataString + d3.selectAll('select')._groups[0][i].id
+          newDataString = newDataString + d3.selectAll('select')._groups[0][i].selectedIndex
+        }
+        newDataString = newDataString + ".tsv"
+
+        set_dataset.file = newDataString
+
+        loadData()
+
+      })
+
 			d3.selectAll('input').on("change",function(){
 			  var currentCode = d3.select(this).attr("code")
 			  //When Total is Selected
@@ -530,7 +549,7 @@ function returnHighestValue (array){
 
 	return highest
 }
-selectedOptions = ["NHAA_ALL","NHBA_ALL","H_ALL"]
+//selectedOptions = ["NHAA_ALL","NHBA_ALL","H_ALL"]
 selectedOptions = ["TOT_POP"]
 var updateCountyFill = function(){
 	counties.attr("fill",function(d){
@@ -561,9 +580,13 @@ var updateCountyFill = function(){
 			})
 
 		}
-
+    if(set_dataset.file==="Age0Sex0.tsv"){
+      qNum = 200000
+    }else{
+      qNum = 200000/18
+    }
 		var quantize = d3.scaleQuantize()
-		    .domain([0, 200000])
+		    .domain([0, qNum])
 		    .range(d3.range(6).map(function(d,i) {
 		      return set_dataset.controlOptions.Race.datastuff[colorindex].colorgradient[i] 
 		    }));
@@ -645,10 +668,13 @@ var drawControls = function(){
 	    	var selector = d3.select('#options')
 				.append('div')
 				.append('select')
-	    
-			set_dataset.controlOptions[option].datastuff.forEach(function(d){
-			      selector.append("option").attr('code',d.code).text(d.label)
-			})
+        .attr('id',option)
+
+  			set_dataset.controlOptions[option].datastuff.forEach(function(d){
+  			      selector.append("option").attr('code',d.code).text(d.label)
+  			})
+
+
 	  	}
 	}
 
@@ -667,6 +693,7 @@ var drawControls = function(){
 	d3.select('#TOT_POP').selectAll('th').selectAll('input').property('checked',true)
 
 }
+
 drawControls()
 drawMap()
 
